@@ -772,7 +772,7 @@ getDate f = do
       nbspToTilde c      = c
   mbd <- rawDateEDTF . T.map nbspToTilde <$> getRawField f
   case mbd of
-    Nothing -> fail "expected date"
+    Nothing -> Prelude.fail "expected date"
     Just d  -> return d
 
 -- A negative (BC) year might be written with -- or --- in bibtex:
