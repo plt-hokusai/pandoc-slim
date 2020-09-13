@@ -9,12 +9,7 @@
 {-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE DeriveTraversable #-}
 module Text.Pandoc.Citeproc
-  ( fromPandocCitations
-  , processCitations
-  , BibFormat(..)
-  , formatFromExtension
-  , getRefs
-  )
+  ( processCitations )
 where
 
 import Citeproc as Citeproc
@@ -47,15 +42,12 @@ import qualified Data.Foldable as Foldable
 import System.FilePath
 import Control.Applicative
 import Control.Monad.Except
-import Data.Maybe (mapMaybe, fromMaybe, isNothing)
+import Data.Maybe (mapMaybe, fromMaybe)
 import Safe (lastMay, initSafe)
 -- import Debug.Trace as Trace (trace, traceShowId)
 
 
 processCitations :: PandocMonad m => Pandoc -> m Pandoc
-processCitations (Pandoc meta bs)
-  | isNothing (lookupMeta "bibliography" meta)
-  , isNothing (lookupMeta "references" meta) = return $ Pandoc meta bs
 processCitations (Pandoc meta bs) = do
   let cslfile = (lookupMeta "csl" meta <|> lookupMeta "citation-style" meta)
                 >>= metaValueToText
@@ -125,6 +117,7 @@ processCitations (Pandoc meta bs) = do
                                   (\id' ->
                                     M.insert id' (referenceId ref)) m ids)
                           M.empty refs
+  -- TODO: issue warning if no refs defined
   let citations = getCitations locale otherIdsMap $ Pandoc meta' bs
   let linkCites = maybe False truish $ lookupMeta "link-citations" meta
   let opts = defaultCiteprocOptions{ linkCitations = linkCites }
