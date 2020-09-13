@@ -49,7 +49,7 @@ import Control.Applicative
 import Control.Monad.Except
 import Data.Maybe (mapMaybe, fromMaybe, isNothing)
 import Safe (lastMay, initSafe)
-import Debug.Trace as Trace (trace, traceShowId)
+-- import Debug.Trace as Trace (trace, traceShowId)
 
 
 processCitations :: PandocMonad m => Pandoc -> m Pandoc

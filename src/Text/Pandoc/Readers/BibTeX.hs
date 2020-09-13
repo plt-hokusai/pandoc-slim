@@ -29,7 +29,6 @@ import Citeproc.Locale (getLocale)
 import Data.Maybe (fromMaybe)
 import Text.Pandoc.Error (PandocError(..))
 import Text.Pandoc.Class (PandocMonad, lookupEnv)
-import Text.Pandoc.Citeproc.BibTeX (readBibtexString)
 import Text.Pandoc.Citeproc.BibTeX as BibTeX
 import Text.Pandoc.Citeproc.MetaValue (referenceToMetaValue)
 import Control.Monad.Except (throwError)
@@ -55,7 +54,7 @@ readBibTeX' variant _opts t = do
   locale <- case getLocale lang of
                Left e  -> throwError $ PandocCiteprocError e
                Right l -> return l
-  case readBibtexString variant locale (const True) t of
+  case BibTeX.readBibtexString variant locale (const True) t of
     Left e -> throwError $ PandocParsecError t e
     Right refs -> return $ setMeta "references"
                               (map referenceToMetaValue refs)
