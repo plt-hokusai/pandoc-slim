@@ -84,372 +84,373 @@ data Item = Item{ identifier :: Text
                 deriving (Show, Ord, Eq)
 
 itemToReference :: Locale -> Variant -> Item -> BibParser (Reference Inlines)
-itemToReference locale variant = bib $ do
-  let lang = fromMaybe defaultLang $ localeLanguage locale
-  modify $ \st -> st{ localeLang = lang,
-                      untitlecase = case lang of
-                                         (Lang "en" _) -> True
-                                         _             -> False }
+itemToReference locale variant item = do
+  setPosition (sourcePos item)
+  bib item $ do
+    let lang = fromMaybe defaultLang $ localeLanguage locale
+    modify $ \st -> st{ localeLang = lang,
+                        untitlecase = case lang of
+                                           (Lang "en" _) -> True
+                                           _             -> False }
 
-  id' <- asks identifier
-  -- pos <- asks sourcePos
-  otherIds <- (Just <$> getRawField "ids")
-                <|> return Nothing
-  (reftype, genre) <- getTypeAndGenre
-  -- hyphenation:
-  let getLangId = do
-           langid <- T.strip . T.toLower <$> getRawField "langid"
-           idopts <- T.strip . T.toLower . stringify <$>
-                         getField "langidopts" <|> return ""
-           case (langid, idopts) of
-                ("english","variant=british")    -> return "british"
-                ("english","variant=american")   -> return "american"
-                ("english","variant=us")         -> return "american"
-                ("english","variant=usmax")      -> return "american"
-                ("english","variant=uk")         -> return "british"
-                ("english","variant=australian") -> return "australian"
-                ("english","variant=newzealand") -> return "newzealand"
-                (x,_)                            -> return x
-  hyphenation <- (Just . toIETF . T.toLower <$>
-                   (getLangId <|> getRawField "hyphenation"))
-                <|> return Nothing
-  modify $ \s -> s{ untitlecase = untitlecase s &&
-                                    case hyphenation of
-                                      Just x -> "en-" `T.isPrefixOf` x
-                                      _ -> True }
-
-
-  opts <- (parseOptions <$> getRawField "options") <|> return []
-
-  et <- asks entryType
-
-  -- titles
-  let isArticle = et `elem`
-                   ["article", "periodical", "suppperiodical", "review"]
-  let isPeriodical = et == "periodical"
-  let isChapterlike = et `elem`
-         ["inbook","incollection","inproceedings","inreference","bookinbook"]
-
-  let getFieldMaybe f = (Just <$> getField f) <|> return Nothing
-
-  -- names
-  let getNameList' f = Just <$>
-       getNameList (("bibtex", case variant of
-                                    Bibtex   -> "true"
-                                    Biblatex -> "false") : opts) f
-
-  author' <- getNameList' "author" <|> return Nothing
-  containerAuthor' <- getNameList' "bookauthor" <|> return Nothing
-  translator' <- getNameList' "translator" <|> return Nothing
-  editortype <- getRawField "editortype" <|> return mempty
-  editor'' <- getNameList' "editor" <|> return Nothing
-  director'' <- getNameList' "director" <|> return Nothing
-  let (editor', director') = case editortype of
-                                  "director" -> (Nothing, editor'')
-                                  _          -> (editor'', director'')
-  -- FIXME: add same for editora, editorb, editorc
-
-  -- dates
-  issued' <- (Just <$> (getDate "date" <|> getOldDate mempty)) <|>
-             return Nothing
-  eventDate' <- (Just <$> (getDate "eventdate" <|> getOldDate "event")) <|>
-                 return Nothing
-  origDate' <- (Just <$> (getDate "origdate" <|> getOldDate "orig")) <|>
-                 return Nothing
-  accessed' <- (Just <$> (getDate "urldate" <|> getOldDate "url")) <|>
-                  return Nothing
-
-  -- locators
-  pages' <- getFieldMaybe "pages"
-  volume' <- getFieldMaybe "volume"
-  part' <- getFieldMaybe "part"
-  volumes' <- getFieldMaybe "volumes"
-  pagetotal' <- getFieldMaybe "pagetotal"
-  chapter' <- getFieldMaybe "chapter"
-  edition' <- getFieldMaybe "edition"
-  version' <- getFieldMaybe "version"
-  (number', collectionNumber', issue') <-
-     (getField "number" >>= \x ->
-       if et `elem` ["book","collection","proceedings","reference",
-                     "mvbook","mvcollection","mvproceedings", "mvreference",
-                     "bookinbook","inbook", "incollection","inproceedings",
-                     "inreference", "suppbook","suppcollection"]
-       then return (Nothing, Just x, Nothing)
-       else if isArticle
-            then (getField "issue" >>= \y ->
-                    return (Nothing, Nothing, Just $ concatWith ',' [x,y]))
-               <|> return (Nothing, Nothing, Just x)
-            else return (Just x, Nothing, Nothing))
-      <|> return (Nothing, Nothing, Nothing)
-
-  -- titles
-  hasMaintitle <- (True <$ getRawField "maintitle") <|> return False
-
-  title' <- Just <$>
-            ((guard isPeriodical >> getTitle "issuetitle")
-            <|> (guard hasMaintitle >>
-                 guard (not isChapterlike) >>
-                 getTitle "maintitle")
-            <|> getTitle "title")
-            <|> return Nothing
-
-  subtitle' <- (guard isPeriodical >> getTitle "issuesubtitle")
-                <|> (guard hasMaintitle >>
-                     guard (not isChapterlike) >>
-                     getTitle "mainsubtitle")
-                <|> getTitle "subtitle"
-                <|> return mempty
-  titleaddon' <- (guard hasMaintitle >>
-                   guard (not isChapterlike) >>
-                   getTitle "maintitleaddon")
-                  <|> getTitle "titleaddon"
-                  <|> return mempty
-
-  volumeTitle' <- Just <$>
-                  ((guard hasMaintitle >>
-                    guard (not isChapterlike) >>
-                    getTitle "title")
-                   <|> (guard hasMaintitle >>
-                        guard isChapterlike >>
-                        getTitle "booktitle"))
+    id' <- asks identifier
+    otherIds <- (Just <$> getRawField "ids")
                   <|> return Nothing
-  volumeSubtitle' <- (guard hasMaintitle >>
+    (reftype, genre) <- getTypeAndGenre
+    -- hyphenation:
+    let getLangId = do
+             langid <- T.strip . T.toLower <$> getRawField "langid"
+             idopts <- T.strip . T.toLower . stringify <$>
+                           getField "langidopts" <|> return ""
+             case (langid, idopts) of
+                  ("english","variant=british")    -> return "british"
+                  ("english","variant=american")   -> return "american"
+                  ("english","variant=us")         -> return "american"
+                  ("english","variant=usmax")      -> return "american"
+                  ("english","variant=uk")         -> return "british"
+                  ("english","variant=australian") -> return "australian"
+                  ("english","variant=newzealand") -> return "newzealand"
+                  (x,_)                            -> return x
+    hyphenation <- (Just . toIETF . T.toLower <$>
+                     (getLangId <|> getRawField "hyphenation"))
+                  <|> return Nothing
+    modify $ \s -> s{ untitlecase = untitlecase s &&
+                                      case hyphenation of
+                                        Just x -> "en-" `T.isPrefixOf` x
+                                        _ -> True }
+
+
+    opts <- (parseOptions <$> getRawField "options") <|> return []
+
+    et <- asks entryType
+
+    -- titles
+    let isArticle = et `elem`
+                     ["article", "periodical", "suppperiodical", "review"]
+    let isPeriodical = et == "periodical"
+    let isChapterlike = et `elem`
+           ["inbook","incollection","inproceedings","inreference","bookinbook"]
+
+    let getFieldMaybe f = (Just <$> getField f) <|> return Nothing
+
+    -- names
+    let getNameList' f = Just <$>
+         getNameList (("bibtex", case variant of
+                                      Bibtex   -> "true"
+                                      Biblatex -> "false") : opts) f
+
+    author' <- getNameList' "author" <|> return Nothing
+    containerAuthor' <- getNameList' "bookauthor" <|> return Nothing
+    translator' <- getNameList' "translator" <|> return Nothing
+    editortype <- getRawField "editortype" <|> return mempty
+    editor'' <- getNameList' "editor" <|> return Nothing
+    director'' <- getNameList' "director" <|> return Nothing
+    let (editor', director') = case editortype of
+                                    "director" -> (Nothing, editor'')
+                                    _          -> (editor'', director'')
+    -- FIXME: add same for editora, editorb, editorc
+
+    -- dates
+    issued' <- (Just <$> (getDate "date" <|> getOldDate mempty)) <|>
+               return Nothing
+    eventDate' <- (Just <$> (getDate "eventdate" <|> getOldDate "event")) <|>
+                   return Nothing
+    origDate' <- (Just <$> (getDate "origdate" <|> getOldDate "orig")) <|>
+                   return Nothing
+    accessed' <- (Just <$> (getDate "urldate" <|> getOldDate "url")) <|>
+                    return Nothing
+
+    -- locators
+    pages' <- getFieldMaybe "pages"
+    volume' <- getFieldMaybe "volume"
+    part' <- getFieldMaybe "part"
+    volumes' <- getFieldMaybe "volumes"
+    pagetotal' <- getFieldMaybe "pagetotal"
+    chapter' <- getFieldMaybe "chapter"
+    edition' <- getFieldMaybe "edition"
+    version' <- getFieldMaybe "version"
+    (number', collectionNumber', issue') <-
+       (getField "number" >>= \x ->
+         if et `elem` ["book","collection","proceedings","reference",
+                       "mvbook","mvcollection","mvproceedings", "mvreference",
+                       "bookinbook","inbook", "incollection","inproceedings",
+                       "inreference", "suppbook","suppcollection"]
+         then return (Nothing, Just x, Nothing)
+         else if isArticle
+              then (getField "issue" >>= \y ->
+                      return (Nothing, Nothing, Just $ concatWith ',' [x,y]))
+                 <|> return (Nothing, Nothing, Just x)
+              else return (Just x, Nothing, Nothing))
+        <|> return (Nothing, Nothing, Nothing)
+
+    -- titles
+    hasMaintitle <- (True <$ getRawField "maintitle") <|> return False
+
+    title' <- Just <$>
+              ((guard isPeriodical >> getTitle "issuetitle")
+              <|> (guard hasMaintitle >>
+                   guard (not isChapterlike) >>
+                   getTitle "maintitle")
+              <|> getTitle "title")
+              <|> return Nothing
+
+    subtitle' <- (guard isPeriodical >> getTitle "issuesubtitle")
+                  <|> (guard hasMaintitle >>
+                       guard (not isChapterlike) >>
+                       getTitle "mainsubtitle")
+                  <|> getTitle "subtitle"
+                  <|> return mempty
+    titleaddon' <- (guard hasMaintitle >>
+                     guard (not isChapterlike) >>
+                     getTitle "maintitleaddon")
+                    <|> getTitle "titleaddon"
+                    <|> return mempty
+
+    volumeTitle' <- Just <$>
+                    ((guard hasMaintitle >>
                       guard (not isChapterlike) >>
-                      getTitle "subtitle")
+                      getTitle "title")
                      <|> (guard hasMaintitle >>
                           guard isChapterlike >>
-                          getTitle "booksubtitle")
-                     <|> return mempty
-  volumeTitleAddon' <- (guard hasMaintitle >>
+                          getTitle "booktitle"))
+                    <|> return Nothing
+    volumeSubtitle' <- (guard hasMaintitle >>
                         guard (not isChapterlike) >>
-                        getTitle "titleaddon")
+                        getTitle "subtitle")
                        <|> (guard hasMaintitle >>
                             guard isChapterlike >>
-                            getTitle "booktitleaddon")
+                            getTitle "booksubtitle")
                        <|> return mempty
+    volumeTitleAddon' <- (guard hasMaintitle >>
+                          guard (not isChapterlike) >>
+                          getTitle "titleaddon")
+                         <|> (guard hasMaintitle >>
+                              guard isChapterlike >>
+                              getTitle "booktitleaddon")
+                         <|> return mempty
 
-  containerTitle' <- Just <$>
-                     ((guard isPeriodical >> getPeriodicalTitle "title")
-                     <|> (guard isChapterlike >> getTitle "maintitle")
-                     <|> (guard isChapterlike >> getTitle "booktitle")
-                     <|> getPeriodicalTitle "journaltitle"
-                     <|> getPeriodicalTitle "journal")
-                     <|> return Nothing
-  containerSubtitle' <- (guard isPeriodical >> getPeriodicalTitle "subtitle")
-                        <|> (guard isChapterlike >> getTitle "mainsubtitle")
-                        <|> (guard isChapterlike >> getTitle "booksubtitle")
-                        <|> getPeriodicalTitle "journalsubtitle"
-                        <|> return mempty
-  containerTitleAddon' <- (guard isPeriodical >>
-                           getPeriodicalTitle "titleaddon")
-                          <|> (guard isChapterlike >>
-                               getTitle "maintitleaddon")
-                          <|> (guard isChapterlike >>
-                               getTitle "booktitleaddon")
+    containerTitle' <- Just <$>
+                       ((guard isPeriodical >> getPeriodicalTitle "title")
+                       <|> (guard isChapterlike >> getTitle "maintitle")
+                       <|> (guard isChapterlike >> getTitle "booktitle")
+                       <|> getPeriodicalTitle "journaltitle"
+                       <|> getPeriodicalTitle "journal")
+                       <|> return Nothing
+    containerSubtitle' <- (guard isPeriodical >> getPeriodicalTitle "subtitle")
+                          <|> (guard isChapterlike >> getTitle "mainsubtitle")
+                          <|> (guard isChapterlike >> getTitle "booksubtitle")
+                          <|> getPeriodicalTitle "journalsubtitle"
                           <|> return mempty
-  containerTitleShort' <- Just <$>
-                          ((guard isPeriodical >>
-                            guard (not hasMaintitle) >>
-                            getField "shorttitle")
-                          <|> getPeriodicalTitle "shortjournal")
-                         <|> return Nothing
+    containerTitleAddon' <- (guard isPeriodical >>
+                             getPeriodicalTitle "titleaddon")
+                            <|> (guard isChapterlike >>
+                                 getTitle "maintitleaddon")
+                            <|> (guard isChapterlike >>
+                                 getTitle "booktitleaddon")
+                            <|> return mempty
+    containerTitleShort' <- Just <$>
+                            ((guard isPeriodical >>
+                              guard (not hasMaintitle) >>
+                              getField "shorttitle")
+                            <|> getPeriodicalTitle "shortjournal")
+                           <|> return Nothing
 
-  -- change numerical series title to e.g. 'series 3'
-  let fixSeriesTitle [Str xs] | isNumber xs =
-        [Str (ordinalize locale xs), Space, Str (resolveKey' lang "jourser")]
-      fixSeriesTitle xs = xs
-  seriesTitle' <- (Just . B.fromList . fixSeriesTitle .
-                   B.toList . resolveKey lang <$>
-                      getTitle "series") <|>
-                  return Nothing
-  shortTitle' <- Just <$>
-                  ((guard (not hasMaintitle || isChapterlike) >>
-                    getTitle "shorttitle")
-                    <|> if (subtitle' /= mempty || titleaddon' /= mempty) &&
-                           not hasMaintitle
-                           then getShortTitle False "title"
-                           else getShortTitle True  "title")
-               <|> return Nothing
+    -- change numerical series title to e.g. 'series 3'
+    let fixSeriesTitle [Str xs] | isNumber xs =
+          [Str (ordinalize locale xs), Space, Str (resolveKey' lang "jourser")]
+        fixSeriesTitle xs = xs
+    seriesTitle' <- (Just . B.fromList . fixSeriesTitle .
+                     B.toList . resolveKey lang <$>
+                        getTitle "series") <|>
+                    return Nothing
+    shortTitle' <- Just <$>
+                    ((guard (not hasMaintitle || isChapterlike) >>
+                      getTitle "shorttitle")
+                      <|> if (subtitle' /= mempty || titleaddon' /= mempty) &&
+                             not hasMaintitle
+                             then getShortTitle False "title"
+                             else getShortTitle True  "title")
+                 <|> return Nothing
 
-  eventTitle' <- Just <$> getTitle "eventtitle" <|> return Nothing
-  origTitle' <- Just <$> getTitle "origtitle" <|> return Nothing
+    eventTitle' <- Just <$> getTitle "eventtitle" <|> return Nothing
+    origTitle' <- Just <$> getTitle "origtitle" <|> return Nothing
 
-  -- publisher
-  pubfields <- mapM (\f -> Just `fmap`
-                       (if variant == Bibtex || f == "howpublished"
-                        then getField f
-                        else getLiteralList' f)
-                      <|> return Nothing)
-         ["school","institution","organization", "howpublished","publisher"]
-  let publisher' = case catMaybes pubfields of
-                     [] -> Nothing
-                     xs -> Just $ concatWith ';' xs
-  origpublisher' <- (Just <$> getField "origpublisher") <|> return Nothing
+    -- publisher
+    pubfields <- mapM (\f -> Just `fmap`
+                         (if variant == Bibtex || f == "howpublished"
+                          then getField f
+                          else getLiteralList' f)
+                        <|> return Nothing)
+           ["school","institution","organization", "howpublished","publisher"]
+    let publisher' = case catMaybes pubfields of
+                       [] -> Nothing
+                       xs -> Just $ concatWith ';' xs
+    origpublisher' <- (Just <$> getField "origpublisher") <|> return Nothing
 
-  -- places
-  venue' <- (Just <$> getField "venue") <|> return Nothing
-  address' <- Just <$>
-                (if variant == Bibtex
-                    then getField "address"
-                    else getLiteralList' "address"
-                       <|> (guard (et /= "patent") >>
-                            getLiteralList' "location"))
-              <|> return Nothing
-  origLocation' <- Just <$>
-                (if variant == Bibtex
-                    then getField "origlocation"
-                    else getLiteralList' "origlocation")
-                  <|> return Nothing
-  jurisdiction' <- if reftype == "patent"
-                   then Just <$>
-                      (concatWith ';' . map (resolveKey lang) <$>
-                           getLiteralList "location") <|> return Nothing
-                   else return Nothing
+    -- places
+    venue' <- (Just <$> getField "venue") <|> return Nothing
+    address' <- Just <$>
+                  (if variant == Bibtex
+                      then getField "address"
+                      else getLiteralList' "address"
+                         <|> (guard (et /= "patent") >>
+                              getLiteralList' "location"))
+                <|> return Nothing
+    origLocation' <- Just <$>
+                  (if variant == Bibtex
+                      then getField "origlocation"
+                      else getLiteralList' "origlocation")
+                    <|> return Nothing
+    jurisdiction' <- if reftype == "patent"
+                     then Just <$>
+                        (concatWith ';' . map (resolveKey lang) <$>
+                             getLiteralList "location") <|> return Nothing
+                     else return Nothing
 
-  -- url, doi, isbn, etc.:
-  -- note that with eprinttype = arxiv, we take eprint to be a partial url
-  -- archivePrefix is an alias for eprinttype
-  url' <- (guard (et == "online" || lookup "url" opts /= Just "false")
-           >> Just <$> getRawField "url")
-       <|> (do etype <- getRawField "eprinttype"
-               eprint <- getRawField "eprint"
-               let baseUrl =
-                     case T.toLower etype of
-                       "arxiv"       -> "http://arxiv.org/abs/"
-                       "jstor"       -> "http://www.jstor.org/stable/"
-                       "pubmed"      -> "http://www.ncbi.nlm.nih.gov/pubmed/"
-                       "googlebooks" -> "http://books.google.com?id="
-                       _             -> ""
-               if T.null baseUrl
-                  then mzero
-                  else return $ Just $ baseUrl <> eprint)
-       <|> return Nothing
-  doi' <- (guard (lookup "doi" opts /= Just "false") >>
-           Just <$> getRawField "doi")
+    -- url, doi, isbn, etc.:
+    -- note that with eprinttype = arxiv, we take eprint to be a partial url
+    -- archivePrefix is an alias for eprinttype
+    url' <- (guard (et == "online" || lookup "url" opts /= Just "false")
+             >> Just <$> getRawField "url")
+         <|> (do etype <- getRawField "eprinttype"
+                 eprint <- getRawField "eprint"
+                 let baseUrl =
+                       case T.toLower etype of
+                         "arxiv"       -> "http://arxiv.org/abs/"
+                         "jstor"       -> "http://www.jstor.org/stable/"
+                         "pubmed"      -> "http://www.ncbi.nlm.nih.gov/pubmed/"
+                         "googlebooks" -> "http://books.google.com?id="
+                         _             -> ""
+                 if T.null baseUrl
+                    then mzero
+                    else return $ Just $ baseUrl <> eprint)
          <|> return Nothing
-  isbn' <- Just <$> getRawField "isbn" <|> return Nothing
-  issn' <- Just <$> getRawField "issn" <|> return Nothing
-  pmid' <- Just <$> getRawField  "pmid" <|> return Nothing
-  pmcid' <- Just <$> getRawField "pmcid" <|> return Nothing
-  callNumber' <- Just <$> getRawField "library" <|> return Nothing
+    doi' <- (guard (lookup "doi" opts /= Just "false") >>
+             Just <$> getRawField "doi")
+           <|> return Nothing
+    isbn' <- Just <$> getRawField "isbn" <|> return Nothing
+    issn' <- Just <$> getRawField "issn" <|> return Nothing
+    pmid' <- Just <$> getRawField  "pmid" <|> return Nothing
+    pmcid' <- Just <$> getRawField "pmcid" <|> return Nothing
+    callNumber' <- Just <$> getRawField "library" <|> return Nothing
 
-  -- notes
-  annotation' <- Just <$>
-                 (getField "annotation" <|> getField "annote")
-                   <|> return Nothing
-  abstract' <- Just <$> getField "abstract" <|> return Nothing
-  keywords' <- Just <$> getField "keywords" <|> return Nothing
-  note' <- if et == "periodical"
-           then return Nothing
-           else Just <$> getField "note" <|> return Nothing
-  addendum' <- if variant == Bibtex
-                  then return Nothing
-                  else Just <$> getField "addendum"
-               <|> return Nothing
-  pubstate' <- (  (Just . resolveKey lang <$> getField "pubstate")
-                <|> case dateLiteral <$> issued' of
-                         Just (Just "forthcoming") ->
-                           return $ Just $ B.str "forthcoming"
-                         _ -> return Nothing
-                 )
-
-
-
-
-  let addField (_, Nothing) = id
-      addField (f, Just x)  = Map.insert f x
-  let vars = foldr addField mempty
-              [ ("other-ids", TextVal <$> otherIds)
-              , ("genre", TextVal <$> genre)
-              , ("language", TextVal <$> hyphenation)
-              -- dates
-              , ("accessed", DateVal <$> accessed')
-              , ("event-date", DateVal <$> eventDate')
-              , ("issued", DateVal <$> issued')
-              , ("original-date", DateVal <$> origDate')
-              -- names
-              , ("author", NamesVal <$> author')
-              , ("editor", NamesVal <$> editor')
-              , ("translator", NamesVal <$> translator')
-              , ("director", NamesVal <$> director')
-              , ("container-author", NamesVal <$> containerAuthor')
-              -- locators
-              , ("page", FancyVal . Walk.walk convertEnDash <$> pages')
-              , ("number-of-pages", FancyVal <$> pagetotal')
-              , ("volume", case (volume', part') of
-                             (Nothing, Nothing) -> Nothing
-                             (Just v, Nothing) -> Just $ FancyVal v
-                             (Nothing, Just p) -> Just $ FancyVal p
-                             (Just v, Just p)  ->
-                               Just $ FancyVal $ v <> B.str "." <> p)
-              , ("number-of-volumes", FancyVal <$> volumes')
-              , ("chapter-number", FancyVal <$> chapter')
-              , ("edition", FancyVal <$> edition')
-              , ("version", FancyVal <$> version')
-              , ("number", FancyVal <$> number')
-              , ("collection-number", FancyVal <$> collectionNumber')
-              , ("issue", FancyVal <$> issue')
-              -- title
-              , ("original-title", FancyVal <$> origTitle')
-              , ("event", FancyVal <$> eventTitle')
-              , ("title", case title' of
-                            Just t -> Just $ FancyVal $
-                                       concatWith '.' [
-                                           concatWith ':' [t, subtitle']
-                                         , titleaddon' ]
-                            Nothing -> Nothing)
-              , ("volume-title",
-                          case volumeTitle' of
-                            Just t -> Just $ FancyVal $
-                                       concatWith '.' [
-                                           concatWith ':' [t, volumeSubtitle']
-                                         , volumeTitleAddon' ]
-                            Nothing -> Nothing)
-              , ("container-title",
-                          case containerTitle' of
-                            Just t -> Just $ FancyVal $
-                                       concatWith '.' [
-                                           concatWith ':' [t,
-                                             containerSubtitle']
-                                         , containerTitleAddon' ]
-                            Nothing -> Nothing)
-              , ("container-title-short", FancyVal <$> containerTitleShort')
-              , ("collection-title", FancyVal <$> seriesTitle')
-              , ("title-short", FancyVal <$> shortTitle')
-              -- publisher
-              , ("publisher", FancyVal <$> publisher')
-              , ("original-publisher", FancyVal <$> origpublisher')
-              -- places
-              , ("jurisdiction", FancyVal <$> jurisdiction')
-              , ("event-place",  FancyVal <$> venue')
-              , ("publisher-place", FancyVal <$> address')
-              , ("original-publisher-place", FancyVal <$> origLocation')
-              -- urls
-              , ("url", TextVal <$> url')
-              , ("doi", TextVal <$> doi')
-              , ("isbn", TextVal <$> isbn')
-              , ("issn", TextVal <$> issn')
-              , ("pmcid", TextVal <$> pmcid')
-              , ("pmid", TextVal <$> pmid')
-              , ("call-number", TextVal <$> callNumber')
-              -- notes
-              , ("note", case catMaybes [note', addendum'] of
-                           [] -> Nothing
-                           xs -> return $ FancyVal $ concatWith '.' xs)
-              , ("annote", FancyVal <$> annotation')
-              , ("abstract", FancyVal <$> abstract')
-              , ("keyword", FancyVal <$> keywords')
-              , ("status", FancyVal <$> pubstate')
-              ]
-  return $ Reference
-    { referenceId             = ItemId id'
-    , referenceType           = reftype
-    , referenceDisambiguation = Nothing
-    , referenceVariables      = vars }
+    -- notes
+    annotation' <- Just <$>
+                   (getField "annotation" <|> getField "annote")
+                     <|> return Nothing
+    abstract' <- Just <$> getField "abstract" <|> return Nothing
+    keywords' <- Just <$> getField "keywords" <|> return Nothing
+    note' <- if et == "periodical"
+             then return Nothing
+             else Just <$> getField "note" <|> return Nothing
+    addendum' <- if variant == Bibtex
+                    then return Nothing
+                    else Just <$> getField "addendum"
+                 <|> return Nothing
+    pubstate' <- (  (Just . resolveKey lang <$> getField "pubstate")
+                  <|> case dateLiteral <$> issued' of
+                           Just (Just "forthcoming") ->
+                             return $ Just $ B.str "forthcoming"
+                           _ -> return Nothing
+                   )
 
 
-bib :: Bib a -> Item -> BibParser a
-bib m entry = fst <$> evalRWST m entry (BibState True (Lang "en" (Just "US")))
+
+
+    let addField (_, Nothing) = id
+        addField (f, Just x)  = Map.insert f x
+    let vars = foldr addField mempty
+                [ ("other-ids", TextVal <$> otherIds)
+                , ("genre", TextVal <$> genre)
+                , ("language", TextVal <$> hyphenation)
+                -- dates
+                , ("accessed", DateVal <$> accessed')
+                , ("event-date", DateVal <$> eventDate')
+                , ("issued", DateVal <$> issued')
+                , ("original-date", DateVal <$> origDate')
+                -- names
+                , ("author", NamesVal <$> author')
+                , ("editor", NamesVal <$> editor')
+                , ("translator", NamesVal <$> translator')
+                , ("director", NamesVal <$> director')
+                , ("container-author", NamesVal <$> containerAuthor')
+                -- locators
+                , ("page", FancyVal . Walk.walk convertEnDash <$> pages')
+                , ("number-of-pages", FancyVal <$> pagetotal')
+                , ("volume", case (volume', part') of
+                               (Nothing, Nothing) -> Nothing
+                               (Just v, Nothing) -> Just $ FancyVal v
+                               (Nothing, Just p) -> Just $ FancyVal p
+                               (Just v, Just p)  ->
+                                 Just $ FancyVal $ v <> B.str "." <> p)
+                , ("number-of-volumes", FancyVal <$> volumes')
+                , ("chapter-number", FancyVal <$> chapter')
+                , ("edition", FancyVal <$> edition')
+                , ("version", FancyVal <$> version')
+                , ("number", FancyVal <$> number')
+                , ("collection-number", FancyVal <$> collectionNumber')
+                , ("issue", FancyVal <$> issue')
+                -- title
+                , ("original-title", FancyVal <$> origTitle')
+                , ("event", FancyVal <$> eventTitle')
+                , ("title", case title' of
+                              Just t -> Just $ FancyVal $
+                                         concatWith '.' [
+                                             concatWith ':' [t, subtitle']
+                                           , titleaddon' ]
+                              Nothing -> Nothing)
+                , ("volume-title",
+                            case volumeTitle' of
+                              Just t -> Just $ FancyVal $
+                                         concatWith '.' [
+                                             concatWith ':' [t, volumeSubtitle']
+                                           , volumeTitleAddon' ]
+                              Nothing -> Nothing)
+                , ("container-title",
+                            case containerTitle' of
+                              Just t -> Just $ FancyVal $
+                                         concatWith '.' [
+                                             concatWith ':' [t,
+                                               containerSubtitle']
+                                           , containerTitleAddon' ]
+                              Nothing -> Nothing)
+                , ("container-title-short", FancyVal <$> containerTitleShort')
+                , ("collection-title", FancyVal <$> seriesTitle')
+                , ("title-short", FancyVal <$> shortTitle')
+                -- publisher
+                , ("publisher", FancyVal <$> publisher')
+                , ("original-publisher", FancyVal <$> origpublisher')
+                -- places
+                , ("jurisdiction", FancyVal <$> jurisdiction')
+                , ("event-place",  FancyVal <$> venue')
+                , ("publisher-place", FancyVal <$> address')
+                , ("original-publisher-place", FancyVal <$> origLocation')
+                -- urls
+                , ("url", TextVal <$> url')
+                , ("doi", TextVal <$> doi')
+                , ("isbn", TextVal <$> isbn')
+                , ("issn", TextVal <$> issn')
+                , ("pmcid", TextVal <$> pmcid')
+                , ("pmid", TextVal <$> pmid')
+                , ("call-number", TextVal <$> callNumber')
+                -- notes
+                , ("note", case catMaybes [note', addendum'] of
+                             [] -> Nothing
+                             xs -> return $ FancyVal $ concatWith '.' xs)
+                , ("annote", FancyVal <$> annotation')
+                , ("abstract", FancyVal <$> abstract')
+                , ("keyword", FancyVal <$> keywords')
+                , ("status", FancyVal <$> pubstate')
+                ]
+    return $ Reference
+      { referenceId             = ItemId id'
+      , referenceType           = reftype
+      , referenceDisambiguation = Nothing
+      , referenceVariables      = vars }
+
+
+bib :: Item -> Bib a -> BibParser a
+bib entry m = fst <$> evalRWST m entry (BibState True (Lang "en" (Just "US")))
 
 resolveCrossRefs :: Variant -> [Item] -> [Item]
 resolveCrossRefs variant entries =
