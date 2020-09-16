@@ -40,7 +40,7 @@ references:
   title: The title
 ...
 ^D
-Blah blah (Doe 2010; 2007; 2008).
+Blah blah (Doe 2010, 2007, 2008).
 
 References {#references .unnumbered}
 ==========

@@ -24,7 +24,7 @@ Foo [@item2; @item1].
 References {#references .unnumbered}
 ==========
 ^D
-Foo (Doe 2018; in press).
+Foo (Doe 2018, in press).
 
 References {#references .unnumbered}
 ==========

@@ -16,7 +16,7 @@ references:
 
 [@item1; @item2]
 ^D
-(Smith, n.d.a; n.d.b)
+(Smith, n.d.a, n.d.b)
 
 ::: {#refs .references .hanging-indent}
 ::: {#ref-item1}
