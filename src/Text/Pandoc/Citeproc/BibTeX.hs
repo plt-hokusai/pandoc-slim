@@ -736,14 +736,15 @@ protectCase f = Walk.walk unprotect . f . Walk.walk protect
   startsWithLowercase (Str (T.uncons -> Just (x,_))) = isLower x
   startsWithLowercase _           = False
 
-unTitlecase :: Inlines -> Inlines
-unTitlecase  = protectCase (caseTransform withSentenceCase)
+unTitlecase :: Maybe Lang -> Inlines -> Inlines
+unTitlecase mblang = protectCase (caseTransform (withSentenceCase mblang))
 
 getTitle :: Text -> Bib Inlines
 getTitle f = do
   ils <- getField f
   utc <- gets untitlecase
-  let processTitle = if utc then unTitlecase else id
+  lang <- gets localeLang
+  let processTitle = if utc then unTitlecase (Just lang) else id
   return $ processTitle ils
 
 getShortTitle :: Bool -> Text -> Bib Inlines
