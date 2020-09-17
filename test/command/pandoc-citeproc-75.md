@@ -59,7 +59,7 @@ references:
 
 (Doe, 2006, no. 6 and 7)
 
-::: {#refs .references .hanging-indent}
+::: {#refs .references .hanging-indent line-spacing="2"}
 ::: {#ref-test}
 Doe, J. (2006). Test, *81*.
 :::

@@ -88,19 +88,19 @@ References {#references .unnumbered}
 
 ::: {#refs .references}
 ::: {#ref-item1}
-[\[1\]]{.csl-display-left-margin}[J. Doe, *First book*. Cambridge:
-Cambridge University Press, 2005.]{.csl-display-right-inline}
+[\[1\]]{.csl-left-margin}[J. Doe, *First book*. Cambridge: Cambridge
+University Press, 2005.]{.csl-right-inline}
 :::
 
 ::: {#ref-item2}
-[\[2\]]{.csl-display-left-margin}[J. Doe, "Article," *Journal of Generic
-Studies*, vol. 6, pp. 33--34, 2006.]{.csl-display-right-inline}
+[\[2\]]{.csl-left-margin}[J. Doe, "Article," *Journal of Generic
+Studies*, vol. 6, pp. 33--34, 2006.]{.csl-right-inline}
 :::
 
 ::: {#ref-пункт3}
-[\[3\]]{.csl-display-left-margin}[J. Doe and J. Roe, "Why water is wet,"
-in *Third book*, S. Smith, Ed. Oxford: Oxford University Press,
-2007.]{.csl-display-right-inline}
+[\[3\]]{.csl-left-margin}[J. Doe and J. Roe, "Why water is wet," in
+*Third book*, S. Smith, Ed. Oxford: Oxford University Press,
+2007.]{.csl-right-inline}
 :::
 :::
 

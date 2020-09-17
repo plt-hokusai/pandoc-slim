@@ -15,7 +15,7 @@ Averroes (1982); Averroes (1892); Averroes (1869)
 References {#references .unnumbered}
 ==========
 
-::: {#refs .references .hanging-indent}
+::: {#refs .references .hanging-indent line-spacing="2"}
 ::: {#ref-averroes/hercz}
 Averroes. (1869). *Drei Abhandlungen über die Conjunction des separaten
 Intellects mit dem Menschen: Von Averroes (Vater und Sohn), aus dem

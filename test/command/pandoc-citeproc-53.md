@@ -28,13 +28,11 @@ Doe[^1] Doe[^2] Roe[^3] Roe[^4] Doe[^5] Doe[^6] Roe[^7] Roe[^8]
 
 ::: {#refs .references}
 ::: {#ref-a}
-[[Doe J.]{.smallcaps} ]{.csl-display-block}[2000, *Work
-A*,.]{.csl-display-left-margin}
+[[Doe J.]{.smallcaps} ]{.csl-block}[2000, *Work A*,.]{.csl-left-margin}
 :::
 
 ::: {#ref-b}
-[[Roe J.]{.smallcaps} ]{.csl-display-block}[1990, *Work
-B*,.]{.csl-display-left-margin}
+[[Roe J.]{.smallcaps} ]{.csl-block}[1990, *Work B*,.]{.csl-left-margin}
 :::
 :::
 

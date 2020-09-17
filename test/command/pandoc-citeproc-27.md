@@ -32,8 +32,8 @@ Here is some text that needs a citation (*1*).
 
 ::: {#refs .references}
 ::: {#ref-AuthorOne2014}
-[1. ]{.csl-display-left-margin}[J. AuthorOne, J. AuthorTwo, *Some
-Journal*, in press.]{.csl-display-right-inline}
+[1. ]{.csl-left-margin}[J. AuthorOne, J. AuthorTwo, *Some Journal*, in
+press.]{.csl-right-inline}
 :::
 :::
 ```

@@ -51,7 +51,7 @@ I have two citations ("Communities," 2011; "Geek Feminism," 2013).
 References {#references .unnumbered}
 ==========
 
-::: {#refs .references .hanging-indent}
+::: {#refs .references .hanging-indent line-spacing="2"}
 ::: {#ref-Feminism2011ces}
 Communities. (2011, August 14). In *Geek Feminism*. Retrieved from
 <http://geekfeminism.wikia.com/wiki/Category:Communities>

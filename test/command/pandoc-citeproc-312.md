@@ -122,7 +122,7 @@ references:
 ---
 
 ^D
-::: {#refs .references .hanging-indent}
+::: {#refs .references .hanging-indent line-spacing="2"}
 ::: {#ref-Y}
 NN. (1950). Date: Year.
 :::

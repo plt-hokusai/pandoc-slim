@@ -124,8 +124,14 @@ processCitations (Pandoc meta bs) = do
   let result = Citeproc.citeproc opts style (localeLanguage locale)
                   refs citations
   mapM_ (report . CiteprocWarning) (resultWarnings result)
-  let classes = "references" : ["hanging-indent" | styleHangingIndent
-                                    (styleOptions style)]
+  let sopts = styleOptions style
+  let classes = "references" : ["hanging-indent" | styleHangingIndent sopts]
+  let refkvs = (case styleEntrySpacing sopts of
+                   Just es | es > 0 -> (("entry-spacing",T.pack $ show es):)
+                   _ -> id) .
+               (case styleLineSpacing sopts of
+                   Just ls | ls > 1 -> (("line-spacing",T.pack $ show ls):)
+                   _ -> id) $ []
   let bibs = mconcat $ map (\(ident, out) ->
                      B.divWith ("ref-" <> ident,[],[]) . B.para $
                        walk (convertQuotes locale) out)
@@ -145,7 +151,7 @@ processCitations (Pandoc meta bs) = do
          walk (fixQuotes .  mvPunct moveNotes locale) $ walk deNote $
          evalState (walkM insertResolvedCitations $ Pandoc meta' bs)
          $ cits
-  return $ Pandoc meta'' $ insertRefs classes meta'' (B.toList bibs) bs'
+  return $ Pandoc meta'' $ insertRefs refkvs classes meta'' (B.toList bibs) bs'
 
 getRefsFromBib :: PandocMonad m
                => Locale -> (Text -> Bool) -> Text -> m [Reference Inlines]
@@ -382,9 +388,9 @@ isYesValue _ = False
 -- if document contains a Div with id="refs", insert
 -- references as its contents.  Otherwise, insert references
 -- at the end of the document in a Div with id="refs"
-insertRefs :: [Text] -> Meta -> [Block] -> [Block] -> [Block]
-insertRefs _ _  []   bs = bs
-insertRefs refclasses meta refs bs =
+insertRefs :: [(Text,Text)] -> [Text] -> Meta -> [Block] -> [Block] -> [Block]
+insertRefs _ _ _  []   bs = bs
+insertRefs refkvs refclasses meta refs bs =
   if isRefRemove meta
      then bs
      else case runState (walkM go bs) False of
@@ -396,13 +402,13 @@ insertRefs refclasses meta refs bs =
                           Header lev (id',classes,kvs) ys : xs ->
                             reverse xs ++
                             [Header lev (id',addUnNumbered classes,kvs) ys,
-                             Div ("refs",refclasses,[]) refs]
+                             Div ("refs",refclasses,refkvs) refs]
                           _ -> bs ++ [refDiv]
                       Just ils -> bs ++
                         [Header 1 ("bibliography", ["unnumbered"], []) ils,
                          refDiv]
   where
-   refDiv = Div ("refs", refclasses, []) refs
+   refDiv = Div ("refs", refclasses, refkvs) refs
    addUnNumbered cs = "unnumbered" : [c | c <- cs, c /= "unnumbered"]
    go :: Block -> State Bool Block
    go (Div ("refs",cs,kvs) xs) = do

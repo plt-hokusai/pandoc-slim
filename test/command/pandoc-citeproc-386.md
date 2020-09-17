@@ -26,10 +26,10 @@ references:
 ^D
 ^\[1\]^
 
-::: {#refs .references}
+::: {#refs .references line-spacing="2"}
 ::: {#ref-ding_metallic_2012}
-[\[1\]]{.csl-display-left-margin}[K. Ding, C. Z. Ning, *Light Sci.
-Appl.* **2012**, *1*, e20.]{.csl-display-right-inline}
+[\[1\]]{.csl-left-margin}[K. Ding, C. Z. Ning, *Light Sci. Appl.*
+**2012**, *1*, e20.]{.csl-right-inline}
 :::
 :::
 ```

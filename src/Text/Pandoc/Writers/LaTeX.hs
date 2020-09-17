@@ -71,7 +71,6 @@ data WriterState =
               , stBeamer        :: Bool          -- produce beamer
               , stEmptyLine     :: Bool          -- true if no content on line
               , stHasCslRefs    :: Bool          -- has a Div with class refs
-              , stCslHangingIndent :: Bool       -- use hanging indent for bib
               , stIsFirstInDefinition :: Bool    -- first block in a defn list
               }
 
@@ -103,7 +102,6 @@ startingState options = WriterState {
                 , stBeamer = False
                 , stEmptyLine = True
                 , stHasCslRefs = False
-                , stCslHangingIndent = False
                 , stIsFirstInDefinition = False }
 
 -- | Convert Pandoc to LaTeX.
@@ -243,7 +241,6 @@ pandocToLaTeX options (Pandoc meta blocks) = do
                      else defField "dir" ("ltr" :: Text)) $
                   defField "section-titles" True $
                   defField "csl-refs" (stHasCslRefs st) $
-                  defField "csl-hanging-indent" (stCslHangingIndent st) $
                   defField "geometry" geometryFromMargins $
                   (case T.uncons . render Nothing <$>
                         getField "papersize" metadata of
@@ -544,12 +541,16 @@ blockToLaTeX (Div (identifier,classes,kvs) bs) = do
   result <- if identifier == "refs"
                then do
                  inner <- blockListToLaTeX bs
-                 modify $ \st -> st{ stHasCslRefs = True
-                                   , stCslHangingIndent =
-                                      "hanging-indent" `elem` classes }
-                 return $ "\\begin{cslreferences}" $$
-                          inner $$
-                          "\\end{cslreferences}"
+                 modify $ \st -> st{ stHasCslRefs = True }
+                 return $ "\\begin{CSLReferences}" <>
+                          (if "hanging-indent" `elem` classes
+                              then braces "1"
+                              else braces "0") <>
+                          (case lookup "entry-spacing" kvs of
+                             Nothing -> braces "0"
+                             Just s  -> braces (literal s))
+                          $$ inner
+                          $+$ "\\end{CSLReferences}"
                else blockListToLaTeX bs
   modify $ \st -> st{ stIncremental = oldIncremental }
   linkAnchor' <- hypertarget True identifier empty
@@ -1161,6 +1162,10 @@ inlineToLaTeX (Span (id',classes,kvs) ils) = do
   let cmds = ["textup" | "csl-no-emph" `elem` classes] ++
              ["textnormal" | "csl-no-strong" `elem` classes ||
                              "csl-no-smallcaps" `elem` classes] ++
+             ["CSLBlock" | "csl-block" `elem` classes] ++
+             ["CSLLeftMargin" | "csl-left-margin" `elem` classes] ++
+             ["CSLRightInline" | "csl-right-inline" `elem` classes] ++
+             ["CSLIndent" | "csl-indent" `elem` classes] ++
              ["RL" | ("dir", "rtl") `elem` kvs] ++
              ["LR" | ("dir", "ltr") `elem` kvs] ++
              (case lang of
