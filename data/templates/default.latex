@@ -376,7 +376,7 @@ $if(csl-refs)$
   % set line spacing
   % set entry spacing
   \ifnum #2 > 0
-  \setlength{\parskip}{#3\lineheight}
+  \setlength{\parskip}{#3\baselineskip}
   \fi
  }%
  {}
