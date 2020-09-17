@@ -1174,12 +1174,17 @@ inlineToLaTeX (Span (id',classes,kvs) ils) = do
                             in  ["text" <> l <> ops]
                 Nothing  -> [])
   contents <- inlineListToLaTeX ils
+  let inCmd' c = (case c of
+                     "CSLBlock" -> (cr <>)
+                     "CSLRightInline" -> (cr <>)
+                     "CSLIndent" -> (cr <>)
+                     _ -> id) . inCmd c
   return $ (if T.null id'
                then empty
                else "\\protect" <> linkAnchor) <>
            (if null cmds
                then braces contents
-               else foldr inCmd contents cmds)
+               else foldr inCmd' contents cmds)
 inlineToLaTeX (Emph lst) = inCmd "emph" <$> inlineListToLaTeX lst
 inlineToLaTeX (Underline lst) = inCmd "underline" <$> inlineListToLaTeX lst
 inlineToLaTeX (Strong lst) = inCmd "textbf" <$> inlineListToLaTeX lst
