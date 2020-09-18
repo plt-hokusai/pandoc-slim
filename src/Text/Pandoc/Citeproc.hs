@@ -125,7 +125,9 @@ processCitations (Pandoc meta bs) = do
                   refs citations
   mapM_ (report . CiteprocWarning) (resultWarnings result)
   let sopts = styleOptions style
-  let classes = "references" : ["hanging-indent" | styleHangingIndent sopts]
+  let classes = "references" : -- TODO remove this or keep for compatibility?
+                "csl-bib-body" :
+                ["hanging-indent" | styleHangingIndent sopts]
   let refkvs = (case styleEntrySpacing sopts of
                    Just es | es > 0 -> (("entry-spacing",T.pack $ show es):)
                    _ -> id) .
@@ -133,7 +135,7 @@ processCitations (Pandoc meta bs) = do
                    Just ls | ls > 1 -> (("line-spacing",T.pack $ show ls):)
                    _ -> id) $ []
   let bibs = mconcat $ map (\(ident, out) ->
-                     B.divWith ("ref-" <> ident,[],[]) . B.para $
+                     B.divWith ("ref-" <> ident,["csl-entry"],[]) . B.para $
                        walk (convertQuotes locale) out)
                       (resultBibliography result)
   let moveNotes = maybe True truish $

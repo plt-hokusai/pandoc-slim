@@ -38,8 +38,8 @@ Expected
 >
 > \[Jane11\] Jane Doe. A book. 2011.
 
-::: {#refs .references}
-::: {#ref-item1}
+::: {#refs .references .csl-bib-body}
+::: {#ref-item1 .csl-entry}
 \[Jane11\] Jane Doe. A book. 2011.
 :::
 :::

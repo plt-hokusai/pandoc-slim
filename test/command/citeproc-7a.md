@@ -26,8 +26,8 @@ Test.[^3]
 
 Test.[^4]
 
-::: {#refs .references .hanging-indent}
-::: {#ref-test}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-test .csl-entry}
 Doe, John. "Test," n.d.
 :::
 :::

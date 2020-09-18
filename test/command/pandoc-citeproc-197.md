@@ -21,8 +21,8 @@ This is a test [@test].
 ^D
 This is a test.[^1]
 
-::: {#refs .references .hanging-indent}
-::: {#ref-test}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-test .csl-entry}
 Abelard, Peter, ed. *Test*. Oxford: Clarendon Press, 1989.
 :::
 :::

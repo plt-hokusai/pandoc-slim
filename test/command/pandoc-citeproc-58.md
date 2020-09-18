@@ -25,8 +25,8 @@ In this item, the title replaces the (unknown) author (see 14.79)
 References {#references .unnumbered}
 ==========
 
-::: {#refs .references .hanging-indent}
-::: {#ref-stanze}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-stanze .csl-entry}
 *Stanze in lode della donna brutta*. 1547. Florence.
 :::
 :::

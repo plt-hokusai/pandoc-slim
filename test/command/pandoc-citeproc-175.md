@@ -37,8 +37,8 @@ Expected
 
 > Doe, Jane. 2011. "A Title." *A Magazine*, January--February.
 
-::: {#refs .references .hanging-indent}
-::: {#ref-item1}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-item1 .csl-entry}
 Doe, Jane. 2011. "A Title." *A Magazine*, January--February 2011.
 :::
 :::

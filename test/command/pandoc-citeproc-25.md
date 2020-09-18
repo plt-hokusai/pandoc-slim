@@ -23,8 +23,8 @@ Foo (Author 1998).
 References {#references .unnumbered}
 ==========
 
-::: {#refs .references .hanging-indent}
-::: {#ref-item1}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-item1 .csl-entry}
 Author, Al. 1998. "Foo Bar Baz: Bazbaz Foo."
 :::
 :::

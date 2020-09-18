@@ -39,24 +39,24 @@ references:
 ^D
 [^1]
 
-::: {#refs .references .hanging-indent}
-::: {#ref-item4}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-item4 .csl-entry}
 Bennett, Frank G., Jr., n.d.
 :::
 
-::: {#ref-item1}
+::: {#ref-item1 .csl-entry}
 Doe, John, III, n.d.
 :::
 
-::: {#ref-item5}
+::: {#ref-item5 .csl-entry}
 Dumboldt, Ezekiel, III, n.d.
 :::
 
-::: {#ref-item3}
+::: {#ref-item3 .csl-entry}
 Humboldt, Alexander von, n.d.
 :::
 
-::: {#ref-item2}
+::: {#ref-item2 .csl-entry}
 van Gogh, Vincent, n.d.
 :::
 :::

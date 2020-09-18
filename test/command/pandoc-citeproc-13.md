@@ -19,8 +19,8 @@ Foo [@item1].
 ^D
 Foo.[^1]
 
-::: {#refs .references .hanging-indent}
-::: {#ref-item1}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-item1 .csl-entry}
 Author, Ann. "Title." *Journal*, 2011.
 :::
 :::

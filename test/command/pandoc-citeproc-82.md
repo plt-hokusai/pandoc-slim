@@ -29,8 +29,8 @@ Title
 
 Some text.[^1]
 
-::: {#refs .references .hanging-indent}
-::: {#ref-OCLC_i1099}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-OCLC_i1099 .csl-entry}
 OCLC. "WorldCat." Accessed September 19, 2014.
 <https://www.worldcat.org/>.
 :::

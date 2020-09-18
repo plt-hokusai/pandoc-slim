@@ -27,13 +27,13 @@ Foo [@item1]. Bar [@item2]. Baz [@item1].
 ^D
 Foo.[^1] Bar.[^2] Baz.[^3]
 
-::: {#refs .references}
-::: {#ref-item1}
+::: {#refs .references .csl-bib-body}
+::: {#ref-item1 .csl-entry}
 Olson HA, 'Codes, Costs, and Critiques: The Organization of Information
 in *Library Quarterly*, 1931--2004' (2006) 76 *Library Quarterly* 19
 :::
 
-::: {#ref-item2}
+::: {#ref-item2 .csl-entry}
 'Second Title'
 :::
 :::

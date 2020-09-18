@@ -13,8 +13,8 @@ references:
 ^D
 ([Doe, n.d.](#ref-doe))
 
-::: {#refs .references .hanging-indent}
-::: {#ref-doe}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-doe .csl-entry}
 Doe. n.d. "Title."
 :::
 :::

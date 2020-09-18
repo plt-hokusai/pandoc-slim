@@ -122,49 +122,49 @@ references:
 ---
 
 ^D
-::: {#refs .references .hanging-indent line-spacing="2"}
-::: {#ref-Y}
+::: {#refs .references .csl-bib-body .hanging-indent line-spacing="2"}
+::: {#ref-Y .csl-entry}
 NN. (1950). Date: Year.
 :::
 
-::: {#ref-Y/Y}
+::: {#ref-Y/Y .csl-entry}
 NN. (1951--1952). Date range: Year.
 :::
 
-::: {#ref-YM}
+::: {#ref-YM .csl-entry}
 NN. (1953, January). Date: Year+month.
 :::
 
-::: {#ref-YM/YM}
+::: {#ref-YM/YM .csl-entry}
 NN. (1954--1955, January--February). Date range: Year+month.
 :::
 
-::: {#ref-YM/YM_same}
+::: {#ref-YM/YM_same .csl-entry}
 NN. (1956, January--February). Date range: Year+month, same year.
 :::
 
-::: {#ref-YMD}
+::: {#ref-YMD .csl-entry}
 NN. (1958, January 15). Date: Year+month+day.
 :::
 
-::: {#ref-YMD/YMD}
+::: {#ref-YMD/YMD .csl-entry}
 NN. (1959--1960, January 15--February 16). Date range: Year+month+day.
 :::
 
-::: {#ref-YMD/YMD_same}
+::: {#ref-YMD/YMD_same .csl-entry}
 NN. (1961--1962, January 15--16). Date range: Year+month+day, same
 month.
 :::
 
-::: {#ref-YS}
+::: {#ref-YS .csl-entry}
 NN. (1963, Autumn). Date: Year+season.
 :::
 
-::: {#ref-YS/YS}
+::: {#ref-YS/YS .csl-entry}
 NN. (1964--1965, Spring--Winter). Date range: Year+season.
 :::
 
-::: {#ref-YS/YS_same}
+::: {#ref-YS/YS_same .csl-entry}
 NN. (1966, Summer--Winter). Date range: Year+season, same year.
 :::
 :::

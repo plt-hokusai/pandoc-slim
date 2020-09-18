@@ -51,13 +51,13 @@ I have two citations ("Communities," 2011; "Geek Feminism," 2013).
 References {#references .unnumbered}
 ==========
 
-::: {#refs .references .hanging-indent line-spacing="2"}
-::: {#ref-Feminism2011ces}
+::: {#refs .references .csl-bib-body .hanging-indent line-spacing="2"}
+::: {#ref-Feminism2011ces .csl-entry}
 Communities. (2011, August 14). In *Geek Feminism*. Retrieved from
 <http://geekfeminism.wikia.com/wiki/Category:Communities>
 :::
 
-::: {#ref-Feminism2013gf}
+::: {#ref-Feminism2013gf .csl-entry}
 Geek Feminism. (2013, April 10). *Geek Feminism*. Retrieved April 10,
 2013, from <http://geekfeminism.wikia.com/wiki/Geek_Feminism>
 :::

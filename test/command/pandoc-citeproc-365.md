@@ -27,8 +27,8 @@ Foo [@legras_michel_2010].
 ^D
 Foo.[^1]
 
-::: {#refs .references}
-::: {#ref-legras_michel_2010}
+::: {#refs .references .csl-bib-body}
+::: {#ref-legras_michel_2010 .csl-entry}
 [Le Gras]{.smallcaps} Gwénaëlle, *Michel Simon : l'art de la disgrâce*,
 Paris, Scope (coll. « Jeux d'acteurs »), 2010, 128 p.
 :::

@@ -28,8 +28,8 @@ References
 References {#references .unnumbered}
 ==========
 
-::: {#refs .references .hanging-indent}
-::: {#ref-Faraday-forthcoming}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-Faraday-forthcoming .csl-entry}
 Faraday, Carry. Forthcoming. "Protean Photography." In *Seven Trips
 Beyond the Asteroid Belt*, edited by James Oring. Cape Canaveral, FL:
 Launch Press.

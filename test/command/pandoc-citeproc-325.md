@@ -18,12 +18,12 @@ references:
 ^D
 (Smith, n.d.a, n.d.b)
 
-::: {#refs .references .hanging-indent}
-::: {#ref-item1}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-item1 .csl-entry}
 Smith, John. n.d.a.
 :::
 
-::: {#ref-item2}
+::: {#ref-item2 .csl-entry}
 ---------. n.d.b.
 :::
 :::

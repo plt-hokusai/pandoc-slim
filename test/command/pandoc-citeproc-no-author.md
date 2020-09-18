@@ -45,28 +45,28 @@ references:
 *Magazine* (2012a, 3), *Magazine* (2012b), *Magazine* (2012c),
 *Magazine* (2012d), *Newspaper* (2012a), *Newspaper* (2012b)
 
-::: {#refs .references .hanging-indent}
-::: {#ref-item1}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-item1 .csl-entry}
 *Magazine*. 2012a. "Title A," 2012.
 :::
 
-::: {#ref-item2}
+::: {#ref-item2 .csl-entry}
 ---------. 2012b. "Title B," 2012.
 :::
 
-::: {#ref-item3}
+::: {#ref-item3 .csl-entry}
 ---------. 2012c. "Title C," 2012.
 :::
 
-::: {#ref-item4}
+::: {#ref-item4 .csl-entry}
 ---------. 2012d. "Title D," 2012.
 :::
 
-::: {#ref-item5}
+::: {#ref-item5 .csl-entry}
 *Newspaper*. 2012a. "Title E," 2012.
 :::
 
-::: {#ref-item6}
+::: {#ref-item6 .csl-entry}
 ---------. 2012b. "Title F," 2012.
 :::
 :::

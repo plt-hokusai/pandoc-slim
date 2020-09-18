@@ -23,8 +23,8 @@ references:
 ^D
 Author (2011)
 
-::: {#refs .references .hanging-indent}
-::: {#ref-item1}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-item1 .csl-entry}
 Author, Ann. 2011. "Title." *Journal*, September 24--26, 2011.
 :::
 :::

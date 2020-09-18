@@ -30,8 +30,8 @@ Minimal example
 
 Here is some text that needs a citation (*1*).
 
-::: {#refs .references}
-::: {#ref-AuthorOne2014}
+::: {#refs .references .csl-bib-body}
+::: {#ref-AuthorOne2014 .csl-entry}
 [1. ]{.csl-left-margin}[J. AuthorOne, J. AuthorTwo, *Some Journal*, in
 press.]{.csl-right-inline}
 :::

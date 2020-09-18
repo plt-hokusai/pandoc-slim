@@ -59,8 +59,8 @@ references:
 
 (Doe, 2006, no. 6 and 7)
 
-::: {#refs .references .hanging-indent line-spacing="2"}
-::: {#ref-test}
+::: {#refs .references .csl-bib-body .hanging-indent line-spacing="2"}
+::: {#ref-test .csl-entry}
 Doe, J. (2006). Test, *81*.
 :::
 :::

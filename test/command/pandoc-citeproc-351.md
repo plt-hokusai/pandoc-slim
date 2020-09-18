@@ -17,8 +17,8 @@ references:
 ^D
 Friedrich Nietzsche (ed.)[^1]
 
-::: {#refs .references .hanging-indent}
-::: {#ref-Nie72}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-Nie72 .csl-entry}
 Nietzsche, Friedrich (ed.), *Die geburt*, 1872.
 :::
 :::

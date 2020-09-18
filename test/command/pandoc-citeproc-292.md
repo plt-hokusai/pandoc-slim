@@ -27,16 +27,16 @@ references:
 ^D
 (Roe, 2007; Zoe, 2009; see for comparison Doe, 2007: 3)
 
-::: {#refs .references .hanging-indent}
-::: {#ref-doe}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-doe .csl-entry}
 Doe (2007).
 :::
 
-::: {#ref-roe}
+::: {#ref-roe .csl-entry}
 Roe (2007).
 :::
 
-::: {#ref-zoe}
+::: {#ref-zoe .csl-entry}
 Zoe (2009).
 :::
 :::

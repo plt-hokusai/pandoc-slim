@@ -23,8 +23,8 @@ Foo[@timmory__justice_1950].
 ^D
 Foo.[^1]
 
-::: {#refs .references}
-::: {#ref-timmory__justice_1950}
+::: {#refs .references .csl-bib-body}
+::: {#ref-timmory__justice_1950 .csl-entry}
 François [Timmory]{.smallcaps}, « *Justice est faite* : soyons justes »,
 *L'Écran français*, 1950, nᵒ 272, p. 12.
 :::

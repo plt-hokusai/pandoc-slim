@@ -123,33 +123,33 @@ Doe (2006b) -- article-newspaper YM
 References {#references .unnumbered}
 ==========
 
-::: {#refs .references .hanging-indent}
-::: {#ref-item2a}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-item2a .csl-entry}
 Doe, John. 2006a. "Title." The Web Site. October--November 2006.
 <http://www.example.com>.
 :::
 
-::: {#ref-item3b}
+::: {#ref-item3b .csl-entry}
 ---------. 2006b. "Title." *The Newspaper*, October--November 2006.
 <http://www.example.com>.
 :::
 
-::: {#ref-item1}
+::: {#ref-item1 .csl-entry}
 ---------. 2006c. "Title." The Web Site. October 26, 2006.
 <http://www.example.com>.
 :::
 
-::: {#ref-item2}
+::: {#ref-item2 .csl-entry}
 ---------. 2006d. "Title." The Web Site. October 26--November 27, 2006.
 <http://www.example.com>.
 :::
 
-::: {#ref-item3}
+::: {#ref-item3 .csl-entry}
 ---------. 2006e. "Title." *The Newspaper*, October 26--November 27,
 2006. <http://www.example.com>.
 :::
 
-::: {#ref-item2b}
+::: {#ref-item2b .csl-entry}
 ---------. 2006--2007. "Title." The Web Site. December 31, 2006--January
 1, 2007. <http://www.example.com>.
 :::

@@ -24,8 +24,8 @@ references:
 ---
 
 ^D
-::: {#refs .references .hanging-indent}
-::: {#ref-item-1}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-item-1 .csl-entry}
 [Wolfinger, Christine]{.smallcaps}: *Keine Angst vor Linux, Unix: ein
 Lehrbuch für Linux- und Unix-Anwender*. 11., vollst. überarb. Aufl.
 Aufl. Berlin \[u.a.\] : Springer Vieweg, 2013

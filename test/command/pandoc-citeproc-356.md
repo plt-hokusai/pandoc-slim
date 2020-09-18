@@ -17,8 +17,8 @@ references:
 ^D
 (Alice 2042)
 
-::: {#refs .references .hanging-indent}
-::: {#ref-foo}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-foo .csl-entry}
 Alice. 2042.
 :::
 :::

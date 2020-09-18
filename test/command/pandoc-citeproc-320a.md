@@ -51,36 +51,36 @@ Foo [@item1; @item2; @item3; @item4; @item5; @item6; @item7; @item8].
 Foo (al-ʾUdhrī, n.d.; al-ʿUdhrī, n.d.; al-\'Udhrī, n.d.; al-'Udhrī,
 n.d.; al-'Udhrī, n.d.; Uch, n.d.; Uebel, n.d.; Zzz, n.d.).
 
-::: {#refs .references .hanging-indent}
-::: {#ref-item6}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-item6 .csl-entry}
 Uch, Ann. n.d.
 :::
 
-::: {#ref-item1}
+::: {#ref-item1 .csl-entry}
 ʾUdhrī, Jamīl al-. n.d.
 :::
 
-::: {#ref-item2}
+::: {#ref-item2 .csl-entry}
 ʿUdhrī, Jamīl al-. n.d.
 :::
 
-::: {#ref-item3}
+::: {#ref-item3 .csl-entry}
 \'Udhrī, Jamīl al-. n.d.
 :::
 
-::: {#ref-item4}
+::: {#ref-item4 .csl-entry}
 'Udhrī, Jamīl al-. n.d.
 :::
 
-::: {#ref-item5}
+::: {#ref-item5 .csl-entry}
 'Udhrī, Jamīl al-. n.d.
 :::
 
-::: {#ref-item7}
+::: {#ref-item7 .csl-entry}
 Uebel, Joe. n.d.
 :::
 
-::: {#ref-item8}
+::: {#ref-item8 .csl-entry}
 Zzz, Zoe. n.d.
 :::
 :::

@@ -93,20 +93,20 @@ chronological order is maintained, regardless of the added abbreviation.
 References {#references .unnumbered}
 ==========
 
-::: {#refs .references .hanging-indent}
-::: {#ref-doe}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-doe .csl-entry}
 Doe, A. 2000a. *Title*.
 :::
 
-::: {#ref-doe-ed}
+::: {#ref-doe-ed .csl-entry}
 ---------, ed. 2000b. *Title*.
 :::
 
-::: {#ref-doeloetoe}
+::: {#ref-doeloetoe .csl-entry}
 Doe, A., A. Loe, and A. Toe. 2000. *Title*.
 :::
 
-::: {#ref-doepoe}
+::: {#ref-doepoe .csl-entry}
 Doe, A., and A. Poe. 2000. *Title*.
 :::
 :::

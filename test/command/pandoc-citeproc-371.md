@@ -29,12 +29,12 @@ Foo (Doe 2018, in press).
 References {#references .unnumbered}
 ==========
 
-::: {#refs .references .hanging-indent}
-::: {#ref-item2}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-item2 .csl-entry}
 Doe, Jane. 2018. *Title Two*.
 :::
 
-::: {#ref-item1}
+::: {#ref-item1 .csl-entry}
 ---------. In press. *Title One*.
 :::
 :::

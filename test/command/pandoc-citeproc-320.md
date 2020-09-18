@@ -138,116 +138,116 @@ n.d.; Madison, n.d.; McAllister, n.d.; McAuley, n.d.; McMillan, n.d.).
 Foo (Sainte-Beuve, n.d.; Saint-Gaudens, n.d.; Saint-Saëns, n.d.; San
 Martin, n.d.; St. Denis, n.d.; St. Laurent, n.d.).
 
-::: {#refs .references .hanging-indent line-spacing="2"}
-::: {#ref-itemA2}
+::: {#refs .references .csl-bib-body .hanging-indent line-spacing="2"}
+::: {#ref-itemA2 .csl-entry}
 ben Yaakov, D. (n.d.).
 :::
 
-::: {#ref-itemA1}
+::: {#ref-itemA1 .csl-entry}
 Benjamin, A. S. (n.d.).
 :::
 
-::: {#ref-itemA3}
+::: {#ref-itemA3 .csl-entry}
 Brown, J. R. (n.d.).
 :::
 
-::: {#ref-itemA4}
+::: {#ref-itemA4 .csl-entry}
 Browning, A. R. (n.d.).
 :::
 
-::: {#ref-itemA5}
+::: {#ref-itemA5 .csl-entry}
 Girard, J.-B. (n.d.).
 :::
 
-::: {#ref-itemA6}
+::: {#ref-itemA6 .csl-entry}
 Girard-Perregaux, A. S. (n.d.).
 :::
 
-::: {#ref-itemA7}
+::: {#ref-itemA7 .csl-entry}
 Ibn Abdulaziz, T. (n.d.).
 :::
 
-::: {#ref-itemA8}
+::: {#ref-itemA8 .csl-entry}
 Ibn Nidal, A. K. M. (n.d.).
 :::
 
-::: {#ref-itemA10}
+::: {#ref-itemA10 .csl-entry}
 López de Molina, G. (n.d.).
 :::
 
-::: {#ref-itemA9}
+::: {#ref-itemA9 .csl-entry}
 López, M. E. (n.d.).
 :::
 
-::: {#ref-itemB1}
+::: {#ref-itemB1 .csl-entry}
 Macalister, D. (n.d.).
 :::
 
-::: {#ref-itemB2}
+::: {#ref-itemB2 .csl-entry}
 MacAlister, P. (n.d.).
 :::
 
-::: {#ref-itemB3}
+::: {#ref-itemB3 .csl-entry}
 Macauley, C. (n.d.).
 :::
 
-::: {#ref-itemB4}
+::: {#ref-itemB4 .csl-entry}
 Macmillan, H. (n.d.).
 :::
 
-::: {#ref-itemB5}
+::: {#ref-itemB5 .csl-entry}
 Madison, J. (n.d.).
 :::
 
-::: {#ref-itemB6}
+::: {#ref-itemB6 .csl-entry}
 McAllister, W. (n.d.).
 :::
 
-::: {#ref-itemB7}
+::: {#ref-itemB7 .csl-entry}
 McAuley, C. (n.d.).
 :::
 
-::: {#ref-itemB8}
+::: {#ref-itemB8 .csl-entry}
 McMillan, E. M. (n.d.).
 :::
 
-::: {#ref-itemC1}
+::: {#ref-itemC1 .csl-entry}
 Sainte-Beuve, C.-A. (n.d.).
 :::
 
-::: {#ref-itemC2}
+::: {#ref-itemC2 .csl-entry}
 Saint-Gaudens, A. (n.d.).
 :::
 
-::: {#ref-itemC3}
+::: {#ref-itemC3 .csl-entry}
 Saint-Saëns, C. (n.d.).
 :::
 
-::: {#ref-itemC4}
+::: {#ref-itemC4 .csl-entry}
 San Martin, J. de. (n.d.).
 :::
 
-::: {#ref-itemA12}
+::: {#ref-itemA12 .csl-entry}
 Singh Siddhu, N. (n.d.).
 :::
 
-::: {#ref-itemA11}
+::: {#ref-itemA11 .csl-entry}
 Singh, Y. (n.d.).
 :::
 
-::: {#ref-itemC5}
+::: {#ref-itemC5 .csl-entry}
 St. Denis, R. (n.d.).
 :::
 
-::: {#ref-itemC6}
+::: {#ref-itemC6 .csl-entry}
 St. Laurent, L. S. (n.d.).
 :::
 
-::: {#ref-itemA13}
+::: {#ref-itemA13 .csl-entry}
 Villafuerte, S. A. (n.d.).
 :::
 
-::: {#ref-itemA14}
+::: {#ref-itemA14 .csl-entry}
 Villa-Lobos, J. (n.d.).
 :::
 :::

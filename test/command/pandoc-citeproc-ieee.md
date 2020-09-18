@@ -86,18 +86,18 @@ With some markup *see* [\[1, p. 32\]](#ref-item1).
 References {#references .unnumbered}
 ==========
 
-::: {#refs .references}
-::: {#ref-item1}
+::: {#refs .references .csl-bib-body}
+::: {#ref-item1 .csl-entry}
 [\[1\]]{.csl-left-margin}[J. Doe, *First book*. Cambridge: Cambridge
 University Press, 2005.]{.csl-right-inline}
 :::
 
-::: {#ref-item2}
+::: {#ref-item2 .csl-entry}
 [\[2\]]{.csl-left-margin}[J. Doe, "Article," *Journal of Generic
 Studies*, vol. 6, pp. 33--34, 2006.]{.csl-right-inline}
 :::
 
-::: {#ref-пункт3}
+::: {#ref-пункт3 .csl-entry}
 [\[3\]]{.csl-left-margin}[J. Doe and J. Roe, "Why water is wet," in
 *Third book*, S. Smith, Ed. Oxford: Oxford University Press,
 2007.]{.csl-right-inline}

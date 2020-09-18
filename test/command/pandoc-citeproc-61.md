@@ -57,12 +57,12 @@ Foo[^5]
 References {#references .unnumbered}
 ==========
 
-::: {#refs .references .hanging-indent}
-::: {#ref-doe}
+::: {#refs .references .csl-bib-body .hanging-indent}
+::: {#ref-doe .csl-entry}
 Doe, John, *Title* (Publisher, 1985)
 :::
 
-::: {#ref-roe}
+::: {#ref-roe .csl-entry}
 Roe, Rob, *Title* (Publisher, 1985)
 :::
 :::
