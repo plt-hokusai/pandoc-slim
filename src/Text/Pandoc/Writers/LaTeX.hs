@@ -1156,16 +1156,20 @@ isQuoted _            = False
 inlineToLaTeX :: PandocMonad m
               => Inline    -- ^ Inline to convert
               -> LW m (Doc Text)
+inlineToLaTeX (Span ("",["csl-block"],[]) ils) =
+  (cr <>) . inCmd "CSLBlock" <$> inlineListToLaTeX ils
+inlineToLaTeX (Span ("",["csl-left-margin"],[]) ils) =
+  inCmd "CSLLeftMargin" <$> inlineListToLaTeX ils
+inlineToLaTeX (Span ("",["csl-right-inline"],[]) ils) =
+  (cr <>) . inCmd "CSLRightInline" <$> inlineListToLaTeX ils
+inlineToLaTeX (Span ("",["csl-indent"],[]) ils) =
+  (cr <>) . inCmd "CSLIndent" <$> inlineListToLaTeX ils
 inlineToLaTeX (Span (id',classes,kvs) ils) = do
   linkAnchor <- hypertarget False id' empty
   lang <- toLang $ lookup "lang" kvs
   let cmds = ["textup" | "csl-no-emph" `elem` classes] ++
              ["textnormal" | "csl-no-strong" `elem` classes ||
                              "csl-no-smallcaps" `elem` classes] ++
-             ["CSLBlock" | "csl-block" `elem` classes] ++
-             ["CSLLeftMargin" | "csl-left-margin" `elem` classes] ++
-             ["CSLRightInline" | "csl-right-inline" `elem` classes] ++
-             ["CSLIndent" | "csl-indent" `elem` classes] ++
              ["RL" | ("dir", "rtl") `elem` kvs] ++
              ["LR" | ("dir", "ltr") `elem` kvs] ++
              (case lang of
@@ -1174,17 +1178,12 @@ inlineToLaTeX (Span (id',classes,kvs) ils) = do
                             in  ["text" <> l <> ops]
                 Nothing  -> [])
   contents <- inlineListToLaTeX ils
-  let inCmd' c = (case c of
-                     "CSLBlock" -> (cr <>)
-                     "CSLRightInline" -> (cr <>)
-                     "CSLIndent" -> (cr <>)
-                     _ -> id) . inCmd c
   return $ (if T.null id'
                then empty
                else "\\protect" <> linkAnchor) <>
            (if null cmds
                then braces contents
-               else foldr inCmd' contents cmds)
+               else foldr inCmd contents cmds)
 inlineToLaTeX (Emph lst) = inCmd "emph" <$> inlineListToLaTeX lst
 inlineToLaTeX (Underline lst) = inCmd "underline" <$> inlineListToLaTeX lst
 inlineToLaTeX (Strong lst) = inCmd "textbf" <$> inlineListToLaTeX lst
