@@ -21,8 +21,6 @@ and writers.
 
 module Text.Pandoc.Class.PandocMonad
   ( PandocMonad(..)
-  , getPOSIXTime
-  , getZonedTime
   , readFileFromDirs
   , report
   , setTrace
@@ -47,27 +45,19 @@ module Text.Pandoc.Class.PandocMonad
   , readDefaultDataFile
   , readDataFile
   , fillMediaBag
-  , toLang
-  , setTranslations
-  , translateTerm
   , makeCanonical
   ) where
 
-import Codec.Archive.Zip
 import Control.Monad.Except (MonadError (catchError, throwError),
                              MonadTrans, lift, when)
 import Data.Digest.Pure.SHA (sha1, showDigest)
 import Data.Maybe (fromMaybe)
-import Data.Time (UTCTime)
-import Data.Time.Clock.POSIX (POSIXTime, utcTimeToPOSIXSeconds)
-import Data.Time.LocalTime (TimeZone, ZonedTime, utcToZonedTime)
 import Network.URI ( escapeURIString, nonStrictRelativeTo,
                      unEscapeString, parseURIReference, isAllowedInURI,
                      parseURI, URI(..) )
 import System.FilePath ((</>), (<.>), takeExtension, dropExtension,
                         isRelative, splitDirectories)
 import System.Random (StdGen)
-import Text.Pandoc.BCP47 (Lang(..), parseBCP47, renderLang)
 import Text.Pandoc.Class.CommonState (CommonState (..))
 import Text.Pandoc.Definition
 import Text.Pandoc.Error
@@ -75,8 +65,6 @@ import Text.Pandoc.Logging
 import Text.Pandoc.MIME (MimeType, getMimeType, extensionFromMimeType)
 import Text.Pandoc.MediaBag (MediaBag, lookupMedia)
 import Text.Pandoc.Shared (uriPathToPath)
-import Text.Pandoc.Translations (Term(..), Translations, lookupTerm,
-                                 readTranslations)
 import Text.Pandoc.Walk (walkM)
 import Text.Parsec (ParsecT, getPosition, sourceLine, sourceName)
 import qualified Data.ByteString as B
@@ -99,10 +87,6 @@ class (Functor m, Applicative m, Monad m, MonadError PandocError m)
       => PandocMonad m where
   -- | Lookup an environment variable.
   lookupEnv :: T.Text -> m (Maybe T.Text)
-  -- | Get the current (UTC) time.
-  getCurrentTime :: m UTCTime
-  -- | Get the locale's time zone.
-  getCurrentTimeZone :: m TimeZone
   -- | Return a new generator for random numbers.
   newStdGen :: m StdGen
   -- | Return a new unique integer.
@@ -124,8 +108,6 @@ class (Functor m, Applicative m, Monad m, MonadError PandocError m)
   fileExists :: FilePath -> m Bool
   -- | Returns the path of data file.
   getDataFileName :: FilePath -> m FilePath
-  -- | Return the modification time of a file.
-  getModificationTime :: FilePath -> m UTCTime
   -- | Get the value of the 'CommonState' used by all instances
   -- of 'PandocMonad'.
   getCommonState :: m CommonState
@@ -244,90 +226,12 @@ getResourcePath = getsCommonState stResourcePath
 setResourcePath :: PandocMonad m => [FilePath] -> m ()
 setResourcePath ps = modifyCommonState $ \st -> st{stResourcePath = ps}
 
--- | Get the POSIX time.
-getPOSIXTime :: PandocMonad m => m POSIXTime
-getPOSIXTime = utcTimeToPOSIXSeconds <$> getCurrentTime
-
--- | Get the zoned time.
-getZonedTime :: PandocMonad m => m ZonedTime
-getZonedTime = do
-  t <- getCurrentTime
-  tz <- getCurrentTimeZone
-  return $ utcToZonedTime tz t
-
 -- | Read file, checking in any number of directories.
 readFileFromDirs :: PandocMonad m => [FilePath] -> FilePath -> m (Maybe T.Text)
 readFileFromDirs [] _ = return Nothing
 readFileFromDirs (d:ds) f = catchError
     (Just . T.pack . UTF8.toStringLazy <$> readFileLazy (d </> f))
     (\_ -> readFileFromDirs ds f)
-
--- | Convert BCP47 string to a Lang, issuing warning
--- if there are problems.
-toLang :: PandocMonad m => Maybe T.Text -> m (Maybe Lang)
-toLang Nothing = return Nothing
-toLang (Just s) =
-  case parseBCP47 s of
-       Left _ -> do
-         report $ InvalidLang s
-         return Nothing
-       Right l -> return (Just l)
-
--- | Select the language to use with 'translateTerm'.
--- Note that this does not read a translation file;
--- that is only done the first time 'translateTerm' is
--- used.
-setTranslations :: PandocMonad m => Lang -> m ()
-setTranslations lang =
-  modifyCommonState $ \st -> st{ stTranslations = Just (lang, Nothing) }
-
--- | Load term map.
-getTranslations :: PandocMonad m => m Translations
-getTranslations = do
-  mbtrans <- getsCommonState stTranslations
-  case mbtrans of
-       Nothing -> return mempty  -- no language defined
-       Just (_, Just t) -> return t
-       Just (lang, Nothing) -> do  -- read from file
-         let translationFile = "translations/" <> renderLang lang <> ".yaml"
-         let fallbackFile = "translations/" <> langLanguage lang <> ".yaml"
-         let getTrans fp = do
-               bs <- readDataFile fp
-               case readTranslations (UTF8.toText bs) of
-                    Left e   -> do
-                      report $ CouldNotLoadTranslations (renderLang lang)
-                        (T.pack fp <> ": " <> e)
-                      -- make sure we don't try again...
-                      modifyCommonState $ \st ->
-                        st{ stTranslations = Nothing }
-                      return mempty
-                    Right t -> do
-                      modifyCommonState $ \st ->
-                                  st{ stTranslations = Just (lang, Just t) }
-                      return t
-         catchError (getTrans $ T.unpack translationFile)
-           (\_ ->
-             catchError (getTrans $ T.unpack fallbackFile)
-               (\e -> do
-                 report $ CouldNotLoadTranslations (renderLang lang)
-                          $ case e of
-                               PandocCouldNotFindDataFileError _ ->
-                                 "data file " <> fallbackFile <> " not found"
-                               _ -> ""
-                 -- make sure we don't try again...
-                 modifyCommonState $ \st -> st{ stTranslations = Nothing }
-                 return mempty))
-
--- | Get a translation from the current term map.
--- Issue a warning if the term is not defined.
-translateTerm :: PandocMonad m => Term -> m T.Text
-translateTerm term = do
-  translations <- getTranslations
-  case lookupTerm term translations of
-       Just s -> return s
-       Nothing -> do
-         report $ NoTranslation $ T.pack $ show term
-         return ""
 
 -- | Specialized version of parseURIReference that disallows
 -- single-letter schemes.  Reason:  these are usually windows absolute
@@ -412,146 +316,6 @@ downloadOrRead s = do
          convertSlash '\\' = '/'
          convertSlash x    = x
 
--- | Retrieve default reference.docx.
-getDefaultReferenceDocx :: PandocMonad m => m Archive
-getDefaultReferenceDocx = do
-  let paths = ["[Content_Types].xml",
-               "_rels/.rels",
-               "docProps/app.xml",
-               "docProps/core.xml",
-               "docProps/custom.xml",
-               "word/document.xml",
-               "word/fontTable.xml",
-               "word/footnotes.xml",
-               "word/comments.xml",
-               "word/numbering.xml",
-               "word/settings.xml",
-               "word/webSettings.xml",
-               "word/styles.xml",
-               "word/_rels/document.xml.rels",
-               "word/_rels/footnotes.xml.rels",
-               "word/theme/theme1.xml"]
-  let toLazy = BL.fromChunks . (:[])
-  let pathToEntry path = do
-        epochtime <- floor . utcTimeToPOSIXSeconds <$> getCurrentTime
-        contents <- toLazy <$> readDataFile ("docx/" ++ path)
-        return $ toEntry path epochtime contents
-  datadir <- getUserDataDir
-  mbArchive <- case datadir of
-                    Nothing   -> return Nothing
-                    Just d    -> do
-                       exists <- fileExists (d </> "reference.docx")
-                       if exists
-                          then return (Just (d </> "reference.docx"))
-                          else return Nothing
-  case mbArchive of
-     Just arch -> toArchive <$> readFileLazy arch
-     Nothing   -> foldr addEntryToArchive emptyArchive <$>
-                     mapM pathToEntry paths
-
--- | Retrieve default reference.odt.
-getDefaultReferenceODT :: PandocMonad m => m Archive
-getDefaultReferenceODT = do
-  let paths = ["mimetype",
-               "manifest.rdf",
-               "styles.xml",
-               "content.xml",
-               "meta.xml",
-               "settings.xml",
-               "Configurations2/accelerator/current.xml",
-               "Thumbnails/thumbnail.png",
-               "META-INF/manifest.xml"]
-  let pathToEntry path = do epochtime <- floor `fmap` getPOSIXTime
-                            contents <- (BL.fromChunks . (:[])) `fmap`
-                                          readDataFile ("odt/" ++ path)
-                            return $ toEntry path epochtime contents
-  datadir <- getUserDataDir
-  mbArchive <- case datadir of
-                    Nothing   -> return Nothing
-                    Just d    -> do
-                       exists <- fileExists (d </> "reference.odt")
-                       if exists
-                          then return (Just (d </> "reference.odt"))
-                          else return Nothing
-  case mbArchive of
-     Just arch -> toArchive <$> readFileLazy arch
-     Nothing   -> foldr addEntryToArchive emptyArchive <$>
-                     mapM pathToEntry paths
-
--- | Retrieve default reference.pptx.
-getDefaultReferencePptx :: PandocMonad m => m Archive
-getDefaultReferencePptx = do
-  -- We're going to narrow this down substantially once we get it
-  -- working.
-  let paths = [ "[Content_Types].xml"
-              , "_rels/.rels"
-              , "docProps/app.xml"
-              , "docProps/core.xml"
-              , "ppt/_rels/presentation.xml.rels"
-              , "ppt/presProps.xml"
-              , "ppt/presentation.xml"
-              , "ppt/slideLayouts/_rels/slideLayout1.xml.rels"
-              , "ppt/slideLayouts/_rels/slideLayout2.xml.rels"
-              , "ppt/slideLayouts/_rels/slideLayout3.xml.rels"
-              , "ppt/slideLayouts/_rels/slideLayout4.xml.rels"
-              , "ppt/slideLayouts/_rels/slideLayout5.xml.rels"
-              , "ppt/slideLayouts/_rels/slideLayout6.xml.rels"
-              , "ppt/slideLayouts/_rels/slideLayout7.xml.rels"
-              , "ppt/slideLayouts/_rels/slideLayout8.xml.rels"
-              , "ppt/slideLayouts/_rels/slideLayout9.xml.rels"
-              , "ppt/slideLayouts/_rels/slideLayout10.xml.rels"
-              , "ppt/slideLayouts/_rels/slideLayout11.xml.rels"
-              , "ppt/slideLayouts/slideLayout1.xml"
-              , "ppt/slideLayouts/slideLayout10.xml"
-              , "ppt/slideLayouts/slideLayout11.xml"
-              , "ppt/slideLayouts/slideLayout2.xml"
-              , "ppt/slideLayouts/slideLayout3.xml"
-              , "ppt/slideLayouts/slideLayout4.xml"
-              , "ppt/slideLayouts/slideLayout5.xml"
-              , "ppt/slideLayouts/slideLayout6.xml"
-              , "ppt/slideLayouts/slideLayout7.xml"
-              , "ppt/slideLayouts/slideLayout8.xml"
-              , "ppt/slideLayouts/slideLayout9.xml"
-              , "ppt/slideMasters/_rels/slideMaster1.xml.rels"
-              , "ppt/slideMasters/slideMaster1.xml"
-              , "ppt/slides/_rels/slide1.xml.rels"
-              , "ppt/slides/slide1.xml"
-              , "ppt/slides/_rels/slide2.xml.rels"
-              , "ppt/slides/slide2.xml"
-              , "ppt/slides/_rels/slide3.xml.rels"
-              , "ppt/slides/slide3.xml"
-              , "ppt/slides/_rels/slide4.xml.rels"
-              , "ppt/slides/slide4.xml"
-              , "ppt/tableStyles.xml"
-              , "ppt/theme/theme1.xml"
-              , "ppt/viewProps.xml"
-              -- These relate to notes slides.
-              , "ppt/notesMasters/notesMaster1.xml"
-              , "ppt/notesMasters/_rels/notesMaster1.xml.rels"
-              , "ppt/notesSlides/notesSlide1.xml"
-              , "ppt/notesSlides/_rels/notesSlide1.xml.rels"
-              , "ppt/notesSlides/notesSlide2.xml"
-              , "ppt/notesSlides/_rels/notesSlide2.xml.rels"
-              , "ppt/theme/theme2.xml"
-              ]
-  let toLazy = BL.fromChunks . (:[])
-  let pathToEntry path = do
-        epochtime <- floor . utcTimeToPOSIXSeconds <$> getCurrentTime
-        contents <- toLazy <$> readDataFile ("pptx/" ++ path)
-        return $ toEntry path epochtime contents
-  datadir <- getUserDataDir
-  mbArchive <- case datadir of
-                    Nothing   -> return Nothing
-                    Just d    -> do
-                       exists <- fileExists (d </> "reference.pptx")
-                       if exists
-                          then return (Just (d </> "reference.pptx"))
-                          else return Nothing
-  case mbArchive of
-     Just arch -> toArchive <$> readFileLazy arch
-     Nothing   -> foldr addEntryToArchive emptyArchive <$>
-                     mapM pathToEntry paths
-
 -- | Read file from user data directory or,
 -- if not found there, from Cabal data directory.
 readDataFile :: PandocMonad m => FilePath -> m B.ByteString
@@ -567,12 +331,6 @@ readDataFile fname = do
 
 -- | Read file from from Cabal data directory.
 readDefaultDataFile :: PandocMonad m => FilePath -> m B.ByteString
-readDefaultDataFile "reference.docx" =
-  B.concat . BL.toChunks . fromArchive <$> getDefaultReferenceDocx
-readDefaultDataFile "reference.pptx" =
-  B.concat . BL.toChunks . fromArchive <$> getDefaultReferencePptx
-readDefaultDataFile "reference.odt" =
-  B.concat . BL.toChunks . fromArchive <$> getDefaultReferenceODT
 readDefaultDataFile fname =
 #ifdef EMBED_DATA_FILES
   case lookup (makeCanonical fname) dataFiles of
@@ -644,11 +402,6 @@ fillMediaBag d = walkM handleImage d
                             "replacing image with description"
                   -- emit alt text
                   return $ Span ("",["image"],[]) lab
-                PandocHttpError u er -> do
-                  report $ CouldNotFetchResource u
-                            (T.pack $ show er ++ "\rReplacing image with description.")
-                  -- emit alt text
-                  return $ Span ("",["image"],[]) lab
                 _ -> throwError e)
         handleImage x = return x
 
@@ -660,8 +413,6 @@ instance (MonadTrans t, PandocMonad m, Functor (t m),
           MonadError PandocError (t m), Monad (t m),
           Applicative (t m)) => PandocMonad (t m) where
   lookupEnv = lift . lookupEnv
-  getCurrentTime = lift getCurrentTime
-  getCurrentTimeZone = lift getCurrentTimeZone
   newStdGen = lift newStdGen
   newUniqueHash = lift newUniqueHash
   openURL = lift . openURL
@@ -670,15 +421,12 @@ instance (MonadTrans t, PandocMonad m, Functor (t m),
   glob = lift . glob
   fileExists = lift . fileExists
   getDataFileName = lift . getDataFileName
-  getModificationTime = lift . getModificationTime
   getCommonState = lift getCommonState
   putCommonState = lift . putCommonState
   logOutput = lift . logOutput
 
 instance {-# OVERLAPS #-} PandocMonad m => PandocMonad (ParsecT s st m) where
   lookupEnv = lift . lookupEnv
-  getCurrentTime = lift getCurrentTime
-  getCurrentTimeZone = lift getCurrentTimeZone
   newStdGen = lift newStdGen
   newUniqueHash = lift newUniqueHash
   openURL = lift . openURL
@@ -687,7 +435,6 @@ instance {-# OVERLAPS #-} PandocMonad m => PandocMonad (ParsecT s st m) where
   glob = lift . glob
   fileExists = lift . fileExists
   getDataFileName = lift . getDataFileName
-  getModificationTime = lift . getModificationTime
   getCommonState = lift getCommonState
   putCommonState = lift . putCommonState
   trace msg = do

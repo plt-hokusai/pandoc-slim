@@ -47,8 +47,6 @@ module Text.Pandoc.Shared (
                      escapeURI,
                      tabFilter,
                      crFilter,
-                     -- * Date/time
-                     normalizeDate,
                      -- * Pandoc block and inline list processing
                      orderedListMarkers,
                      extractSpaces,
@@ -83,7 +81,6 @@ module Text.Pandoc.Shared (
                      inDirectory,
                      collapseFilePath,
                      uriPathToPath,
-                     filteredFilesFromArchive,
                      -- * URI handling
                      schemes,
                      isURI,
@@ -103,11 +100,9 @@ module Text.Pandoc.Shared (
                      pandocVersion
                     ) where
 
-import Codec.Archive.Zip
 import qualified Control.Exception as E
-import Control.Monad (MonadPlus (..), msum, unless)
+import Control.Monad (MonadPlus (..), unless)
 import qualified Control.Monad.State.Strict as S
-import qualified Data.ByteString.Lazy as BL
 import qualified Data.Bifunctor as Bifunctor
 import Data.Char (isAlpha, isLower, isSpace, isUpper, toLower, isAlphaNum,
                   generalCategory, GeneralCategory(NonSpacingMark,
@@ -119,9 +114,7 @@ import Data.Monoid (Any (..))
 import Data.Sequence (ViewL (..), ViewR (..), viewl, viewr)
 import qualified Data.Set as Set
 import qualified Data.Text as T
-import Data.Version (showVersion)
 import Network.URI (URI (uriScheme), escapeURIString, parseURI)
-import Paths_pandoc (version)
 import System.Directory
 import System.FilePath (isPathSeparator, splitDirectories)
 import qualified System.FilePath.Posix as Posix
@@ -129,7 +122,6 @@ import Text.HTML.TagSoup (RenderOptions (..), Tag (..), renderOptions,
                           renderTagsOptions)
 import Text.Pandoc.Builder (Blocks, Inlines, ToMetaValue (..))
 import qualified Text.Pandoc.Builder as B
-import Data.Time
 import Text.Pandoc.Asciify (toAsciiChar)
 import Text.Pandoc.Definition
 import Text.Pandoc.Extensions (Extensions, Extension(..), extensionEnabled)
@@ -139,7 +131,7 @@ import Text.Pandoc.Walk
 
 -- | Version number of pandoc library.
 pandocVersion :: T.Text
-pandocVersion = T.pack $ showVersion version
+pandocVersion = T.pack "slim"
 
 --
 -- List processing
@@ -349,23 +341,6 @@ crFilter = T.filter (/= '\r')
 --
 -- Date/time
 --
-
--- | Parse a date and convert (if possible) to "YYYY-MM-DD" format. We
--- limit years to the range 1601-9999 (ISO 8601 accepts greater than
--- or equal to 1583, but MS Word only accepts dates starting 1601).
-normalizeDate :: T.Text -> Maybe T.Text
-normalizeDate = fmap T.pack . normalizeDate' . T.unpack
-
-normalizeDate' :: String -> Maybe String
-normalizeDate' s = fmap (formatTime defaultTimeLocale "%F")
-  (msum $ map (\fs -> parsetimeWith fs s >>= rejectBadYear) formats :: Maybe Day)
-  where rejectBadYear day = case toGregorian day of
-          (y, _, _) | y >= 1601 && y <= 9999 -> Just day
-          _         -> Nothing
-        parsetimeWith = parseTimeM True defaultTimeLocale
-        formats = ["%x","%m/%d/%Y", "%D","%F", "%d %b %Y",
-                    "%e %B %Y", "%b. %e, %Y", "%B %e, %Y",
-                    "%Y%m%d", "%Y%m", "%Y"]
 
 --
 -- Pandoc block and inline list processing
@@ -894,21 +869,6 @@ uriPathToPath (T.unpack -> path) =
 #else
   path
 #endif
-
---
--- File selection from the archive
---
-filteredFilesFromArchive :: Archive -> (FilePath -> Bool) -> [(FilePath, BL.ByteString)]
-filteredFilesFromArchive zf f =
-  mapMaybe (fileAndBinary zf) (filter f (filesInArchive zf))
-  where
-    fileAndBinary :: Archive -> FilePath -> Maybe (FilePath, BL.ByteString)
-    fileAndBinary a fp = findEntryByPath fp a >>= \e -> Just (fp, fromEntry e)
-
-
---
--- IANA URIs
---
 
 -- | Schemes from http://www.iana.org/assignments/uri-schemes.html plus
 -- the unofficial schemes doi, javascript, isbn, pmid.

@@ -336,7 +336,7 @@ pandocToHtml opts (Pandoc meta blocks) = do
                   maybe id (defField "table-of-contents") toc $
                   defField "author-meta" authsMeta $
                   maybe id (defField "date-meta")
-                    (normalizeDate dateMeta) $
+                    (Just dateMeta) $
                   defField "pagetitle"
                       (stringifyHTML . docTitle $ meta) $
                   defField "idprefix" (writerIdentifierPrefix opts) $

@@ -50,8 +50,6 @@ newtype PandocIO a = PandocIO {
 
 instance PandocMonad PandocIO where
   lookupEnv = IO.lookupEnv
-  getCurrentTime = IO.getCurrentTime
-  getCurrentTimeZone = IO.getCurrentTimeZone
   newStdGen = IO.newStdGen
   newUniqueHash = IO.newUniqueHash
 
@@ -62,7 +60,6 @@ instance PandocMonad PandocIO where
   glob = IO.glob
   fileExists = IO.fileExists
   getDataFileName = IO.getDataFileName
-  getModificationTime = IO.getModificationTime
 
   getCommonState = PandocIO $ lift get
   putCommonState = PandocIO . lift . put

@@ -19,11 +19,9 @@ module Text.Pandoc.Class
   , module Text.Pandoc.Class.PandocIO
   , module Text.Pandoc.Class.PandocMonad
   , module Text.Pandoc.Class.PandocPure
-  , Translations
   ) where
 
 import Text.Pandoc.Class.CommonState (CommonState (..))
 import Text.Pandoc.Class.PandocMonad
 import Text.Pandoc.Class.PandocIO
 import Text.Pandoc.Class.PandocPure
-import Text.Pandoc.Translations (Translations)

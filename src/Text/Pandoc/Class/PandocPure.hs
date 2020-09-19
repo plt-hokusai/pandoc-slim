@@ -28,14 +28,10 @@ module Text.Pandoc.Class.PandocPure
   , runPure
   ) where
 
-import Codec.Archive.Zip
 import Control.Monad.Except
 import Control.Monad.State.Strict
 import Data.Default
 import Data.Text (Text)
-import Data.Time (UTCTime)
-import Data.Time.Clock.POSIX ( posixSecondsToUTCTime )
-import Data.Time.LocalTime (TimeZone, utc)
 import Data.Word (Word8)
 import System.Directory (doesDirectoryExist, getDirectoryContents)
 import System.FilePath ((</>))
@@ -48,7 +44,6 @@ import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.Map as M
 import qualified Data.Text as T
-import qualified System.Directory as Directory (getModificationTime)
 
 -- | The 'PureState' contains ersatz representations
 -- of things that would normally be obtained through IO.
@@ -58,11 +53,6 @@ data PureState = PureState
   , stUniqStore  :: [Int]      -- ^ should be infinite and contain every
                                -- element at most once, e.g. [1..]
   , stEnv :: [(Text, Text)]
-  , stTime :: UTCTime
-  , stTimeZone :: TimeZone
-  , stReferenceDocx :: Archive
-  , stReferencePptx :: Archive
-  , stReferenceODT :: Archive
   , stFiles :: FileTree
   , stUserDataFiles :: FileTree
   , stCabalDataFiles :: FileTree
@@ -74,11 +64,6 @@ instance Default PureState where
         , stWord8Store = [1..]
         , stUniqStore = [1..]
         , stEnv = [("USER", "pandoc-user")]
-        , stTime = posixSecondsToUTCTime 0
-        , stTimeZone = utc
-        , stReferenceDocx = emptyArchive
-        , stReferencePptx = emptyArchive
-        , stReferenceODT = emptyArchive
         , stFiles = mempty
         , stUserDataFiles = mempty
         , stCabalDataFiles = mempty
@@ -105,8 +90,7 @@ modifyPureState f = PandocPure $ lift $ lift $ modify f
 -- | Captures all file-level information necessary for a @'PandocMonad'@
 -- conforming mock file system.
 data FileInfo = FileInfo
-  { infoFileMTime :: UTCTime
-  , infoFileContents :: B.ByteString
+  { infoFileContents :: B.ByteString
   }
 
 -- | Basis of the mock file system used by @'PandocPure'@.
@@ -133,9 +117,7 @@ addToFileTree tree fp = do
        foldM addToFileTree tree fs
      else do
        contents <- B.readFile fp
-       mtime <- Directory.getModificationTime fp
-       return $ insertInFileTree fp FileInfo{ infoFileMTime = mtime
-                                            , infoFileContents = contents } tree
+       return $ insertInFileTree fp FileInfo{ infoFileContents = contents } tree
 
 -- | Insert an ersatz file into the 'FileTree'.
 insertInFileTree :: FilePath -> FileInfo -> FileTree -> FileTree
@@ -162,10 +144,6 @@ instance PandocMonad PandocPure where
   lookupEnv s = do
     env <- getsPureState stEnv
     return (lookup s env)
-
-  getCurrentTime = getsPureState stTime
-
-  getCurrentTimeZone = getsPureState stTimeZone
 
   newStdGen = do
     oldGen <- getsPureState stStdGen
@@ -204,13 +182,6 @@ instance PandocMonad PandocPure where
          Just _  -> return True
 
   getDataFileName fp = return $ "data/" ++ fp
-
-  getModificationTime fp = do
-    fps <- getsPureState stFiles
-    case infoFileMTime <$> getFileInfo fp fps of
-      Just tm -> return tm
-      Nothing -> throwError $ PandocIOError (T.pack fp)
-                    (userError "Can't get modification time")
 
   getCommonState = PandocPure $ lift get
   putCommonState x = PandocPure $ lift $ put x

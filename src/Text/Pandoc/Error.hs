@@ -24,7 +24,6 @@ import Data.Word (Word8)
 import Data.Text (Text)
 import qualified Data.Text as T
 import GHC.Generics (Generic)
-import Network.HTTP.Client (HttpException)
 import System.Exit (ExitCode (..), exitWith)
 import System.IO (stderr)
 import qualified Text.Pandoc.UTF8 as UTF8
@@ -35,7 +34,6 @@ import Text.Parsec.Pos hiding (Line)
 type Input = Text
 
 data PandocError = PandocIOError Text IOError
-                 | PandocHttpError Text HttpException
                  | PandocShouldNeverHappenError Text
                  | PandocSomeError Text
                  | PandocParseError Text
@@ -69,8 +67,6 @@ handleError (Right r) = return r
 handleError (Left e) =
   case e of
     PandocIOError _ err' -> ioError err'
-    PandocHttpError u err' -> err 61 $
-      "Could not fetch " <> u <> "\n" <> tshow err'
     PandocShouldNeverHappenError s -> err 62 $
       "Something we thought was impossible happened!\n" <>
       "Please report this to pandoc's developers: " <> s

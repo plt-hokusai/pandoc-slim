@@ -45,8 +45,7 @@ import Text.Pandoc.BCP47 (Lang (..), renderLang)
 import Text.Pandoc.Builder
 import Text.Pandoc.Class.PandocPure (PandocPure)
 import Text.Pandoc.Class.PandocMonad (PandocMonad (..), getResourcePath,
-                                      readFileFromDirs, report, setResourcePath,
-                                      setTranslations, translateTerm)
+                                      readFileFromDirs, report, setResourcePath)
 import Text.Pandoc.Error (PandocError (PandocParseError, PandocParsecError))
 import Text.Pandoc.Highlighting (fromListingsLanguage, languagesByExtension)
 import Text.Pandoc.ImageSize (numUnit, showFl)
@@ -61,7 +60,6 @@ import Text.Pandoc.Readers.LaTeX.Lang (polyglossiaLangToBCP47,
                                        babelLangToBCP47)
 import Text.Pandoc.Readers.LaTeX.SIunitx
 import Text.Pandoc.Shared
-import qualified Text.Pandoc.Translations as Translations
 import Text.Pandoc.Walk
 import qualified Text.Pandoc.Builder as B
 import qualified Data.Text.Normalize as Normalize
@@ -776,27 +774,6 @@ inlineCommands = M.union inlineLanguageCommands $ M.fromList
   -- hypehnquote uses regular quotes
   , ("hyphenquote*", braced >>= enquote True . Just . untokenize)
   , ("hyphenquote", braced >>= enquote False . Just . untokenize)
-  , ("figurename", doTerm Translations.Figure)
-  , ("prefacename", doTerm Translations.Preface)
-  , ("refname", doTerm Translations.References)
-  , ("bibname", doTerm Translations.Bibliography)
-  , ("chaptername", doTerm Translations.Chapter)
-  , ("partname", doTerm Translations.Part)
-  , ("contentsname", doTerm Translations.Contents)
-  , ("listfigurename", doTerm Translations.ListOfFigures)
-  , ("listtablename", doTerm Translations.ListOfTables)
-  , ("indexname", doTerm Translations.Index)
-  , ("abstractname", doTerm Translations.Abstract)
-  , ("tablename", doTerm Translations.Table)
-  , ("enclname", doTerm Translations.Encl)
-  , ("ccname", doTerm Translations.Cc)
-  , ("headtoname", doTerm Translations.To)
-  , ("pagename", doTerm Translations.Page)
-  , ("seename", doTerm Translations.See)
-  , ("seealsoname", doTerm Translations.SeeAlso)
-  , ("proofname", doTerm Translations.Proof)
-  , ("glossaryname", doTerm Translations.Glossary)
-  , ("lstlistingname", doTerm Translations.Listing)
   , ("cite", citation "cite" NormalCitation False)
   , ("Cite", citation "Cite" NormalCitation False)
   , ("citep", citation "citep" NormalCitation False)
@@ -1053,9 +1030,6 @@ ifToggle = do
                   pos <- getPosition
                   report $ UndefinedToggle name' pos
   return ()
-
-doTerm :: PandocMonad m => Translations.Term -> LP m Inlines
-doTerm term = str <$> translateTerm term
 
 ifstrequal :: (PandocMonad m, Monoid a) => LP m a
 ifstrequal = do
@@ -2398,14 +2372,4 @@ blocks :: PandocMonad m => LP m Blocks
 blocks = mconcat <$> many block
 
 setDefaultLanguage :: PandocMonad m => LP m Blocks
-setDefaultLanguage = do
-  o <- option "" $ T.filter (\c -> c /= '[' && c /= ']')
-                <$> rawopt
-  polylang <- untokenize <$> braced
-  case M.lookup polylang polyglossiaLangToBCP47 of
-       Nothing -> return mempty -- TODO mzero? warning?
-       Just langFunc -> do
-         let l = langFunc o
-         setTranslations l
-         updateState $ setMeta "lang" $ str (renderLang l)
-         return mempty
+setDefaultLanguage = return mempty

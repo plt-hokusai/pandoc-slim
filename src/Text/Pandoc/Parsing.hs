@@ -206,8 +206,8 @@ import Text.Pandoc.Class.PandocMonad (PandocMonad, readFileFromDirs, report)
 import Text.Pandoc.Definition
 import Text.Pandoc.Logging
 import Text.Pandoc.Options
-import Text.Pandoc.Readers.LaTeX.Types (Macro)
 import Text.Pandoc.Shared
+import Text.Pandoc.Readers.LaTeX.Types
 import qualified Text.Pandoc.UTF8 as UTF8 (putStrLn)
 import Text.Pandoc.XML (fromEntities)
 import Text.Parsec hiding (token)

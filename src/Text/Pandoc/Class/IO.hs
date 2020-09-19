@@ -17,10 +17,7 @@ types.
 -}
 module Text.Pandoc.Class.IO
   ( fileExists
-  , getCurrentTime
-  , getCurrentTimeZone
   , getDataFileName
-  , getModificationTime
   , glob
   , logOutput
   , logIOError
@@ -36,28 +33,15 @@ module Text.Pandoc.Class.IO
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.ByteString.Base64 (decodeLenient)
-import Data.ByteString.Lazy (toChunks)
 import Data.Text (Text, pack, unpack)
-import Data.Time (TimeZone, UTCTime)
 import Data.Unique (hashUnique)
-import Network.Connection (TLSSettings (TLSSettingsSimple))
-import Network.HTTP.Client
-       (httpLbs, responseBody, responseHeaders,
-        Request(port, host, requestHeaders), parseRequest, newManager)
-import Network.HTTP.Client.Internal (addProxy)
-import Network.HTTP.Client.TLS (mkManagerSettings)
-import Network.HTTP.Types.Header ( hContentType )
-import Network.Socket (withSocketsDo)
 import Network.URI (unEscapeString)
 import System.Directory (createDirectoryIfMissing)
-import System.Environment (getEnv)
 import System.FilePath ((</>), takeDirectory, normalise)
 import System.IO (stderr)
 import System.IO.Error
 import System.Random (StdGen)
-import Text.Pandoc.Class.CommonState (CommonState (..))
-import Text.Pandoc.Class.PandocMonad
-       (PandocMonad, getsCommonState, getMediaBag, report)
+import Text.Pandoc.Class.PandocMonad (PandocMonad, getMediaBag, report)
 import Text.Pandoc.Definition (Pandoc, Inline (Image))
 import Text.Pandoc.Error (PandocError (..))
 import Text.Pandoc.Logging (LogMessage (..), messageVerbosity, showLogMessage)
@@ -67,19 +51,13 @@ import Text.Pandoc.Walk (walk)
 import qualified Control.Exception as E
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
-import qualified Data.CaseInsensitive as CI
 import qualified Data.Text as T
-import qualified Data.Time
-import qualified Data.Time.LocalTime
 import qualified Data.Unique
 import qualified System.Directory
 import qualified System.Environment as Env
 import qualified System.FilePath.Glob
 import qualified System.Random
 import qualified Text.Pandoc.UTF8 as UTF8
-#ifndef EMBED_DATA_FILES
-import qualified Paths_pandoc as Paths
-#endif
 
 -- | Utility function to lift IO errors into 'PandocError's.
 liftIOError :: (PandocMonad m, MonadIO m) => (String -> IO a) -> String -> m a
@@ -101,14 +79,6 @@ logIOError f = do
 lookupEnv :: MonadIO m => Text -> m (Maybe Text)
 lookupEnv = fmap (fmap pack) . liftIO . Env.lookupEnv . unpack
 
--- | Get the current (UTC) time.
-getCurrentTime :: MonadIO m => m UTCTime
-getCurrentTime = liftIO Data.Time.getCurrentTime
-
--- | Get the locale's time zone.
-getCurrentTimeZone :: MonadIO m => m TimeZone
-getCurrentTimeZone = liftIO Data.Time.LocalTime.getCurrentTimeZone
-
 -- | Return a new generator for random numbers.
 newStdGen :: MonadIO m => m StdGen
 newStdGen = liftIO System.Random.newStdGen
@@ -124,29 +94,7 @@ openURL u
      let contents = UTF8.fromString $
                      unEscapeString $ T.unpack $ T.drop 1 $ T.dropWhile (/=',') u''
      return (decodeLenient contents, Just mime)
- | otherwise = do
-     let toReqHeader (n, v) = (CI.mk (UTF8.fromText n), UTF8.fromText v)
-     customHeaders <- map toReqHeader <$> getsCommonState stRequestHeaders
-     disableCertificateValidation <- getsCommonState stNoCheckCertificate
-     report $ Fetching u
-     res <- liftIO $ E.try $ withSocketsDo $ do
-       let parseReq = parseRequest
-       proxy <- tryIOError (getEnv "http_proxy")
-       let addProxy' x = case proxy of
-                            Left _ -> return x
-                            Right pr -> parseReq pr >>= \r ->
-                                return (addProxy (host r) (port r) x)
-       req <- parseReq (unpack u) >>= addProxy'
-       let req' = req{requestHeaders = customHeaders ++ requestHeaders req}
-       let tlsSimple = TLSSettingsSimple disableCertificateValidation False False
-       let tlsManagerSettings = mkManagerSettings tlsSimple  Nothing
-       resp <- newManager tlsManagerSettings >>= httpLbs req'
-       return (B.concat $ toChunks $ responseBody resp,
-               UTF8.toText `fmap` lookup hContentType (responseHeaders resp))
-
-     case res of
-          Right r -> return r
-          Left e  -> throwError $ PandocHttpError u e
+ | otherwise = throwError (PandocShouldNeverHappenError "non-data: openURL is not supported in pandoc-slim")
 
 -- | Read the lazy ByteString contents from a file path, raising an error on
 -- failure.
@@ -169,15 +117,7 @@ fileExists = liftIOError System.Directory.doesFileExist
 
 -- | Returns the path of data file.
 getDataFileName :: (PandocMonad m, MonadIO m) => FilePath -> m FilePath
-#ifdef EMBED_DATA_FILES
 getDataFileName = return
-#else
-getDataFileName = liftIOError Paths.getDataFileName
-#endif
-
--- | Return the modification time of a file.
-getModificationTime :: (PandocMonad m, MonadIO m) => FilePath -> m UTCTime
-getModificationTime = liftIOError System.Directory.getModificationTime
 
 -- | Output a log message.
 logOutput :: (PandocMonad m, MonadIO m) => LogMessage -> m ()
