@@ -6,10 +6,5 @@ package pandoc
 
 source-repository-package
     type: git
-    location: https://github.com/jgm/pandoc-types
-    tag: 8e9ca37802120f32ececac752d73463e2fc86811
-
-source-repository-package
-    type: git
     location: https://github.com/jgm/citeproc
     tag: ee5cd1726037c79f6519d5be4822a1f795d09cad
