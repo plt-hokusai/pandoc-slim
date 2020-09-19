@@ -538,10 +538,11 @@ blockToLaTeX (Div (identifier,classes,kvs) bs) = do
      then modify $ \st -> st{ stIncremental = True }
      else when (beamer && "nonincremental" `elem` classes) $
              modify $ \st -> st { stIncremental = False }
-  result <- if identifier == "refs"
+  result <- if identifier == "refs" || -- <- for backwards compatibility
+               "csl-bib-body" `elem` classes
                then do
-                 inner <- blockListToLaTeX bs
                  modify $ \st -> st{ stHasCslRefs = True }
+                 inners <- mapM cslEntryToLaTeX bs
                  return $ "\\begin{CSLReferences}" <>
                           (if "hanging-indent" `elem` classes
                               then braces "1"
@@ -549,7 +550,7 @@ blockToLaTeX (Div (identifier,classes,kvs) bs) = do
                           (case lookup "entry-spacing" kvs of
                              Nothing -> braces "0"
                              Just s  -> braces (literal s))
-                          $$ inner
+                          $$ vcat inners
                           $+$ "\\end{CSLReferences}"
                else blockListToLaTeX bs
   modify $ \st -> st{ stIncremental = oldIncremental }
@@ -1152,18 +1153,27 @@ isQuoted :: Inline -> Bool
 isQuoted (Quoted _ _) = True
 isQuoted _            = False
 
+cslEntryToLaTeX :: PandocMonad m
+                => Block
+                -> LW m (Doc Text)
+cslEntryToLaTeX (Para xs) =
+  mconcat <$> mapM go xs
+ where
+   go (Span ("",["csl-block"],[]) ils) =
+     (cr <>) . inCmd "CSLBlock" <$> inlineListToLaTeX ils
+   go (Span ("",["csl-left-margin"],[]) ils) =
+     inCmd "CSLLeftMargin" <$> inlineListToLaTeX ils
+   go (Span ("",["csl-right-inline"],[]) ils) =
+     (cr <>) . inCmd "CSLRightInline" <$> inlineListToLaTeX ils
+   go (Span ("",["csl-indent"],[]) ils) =
+     (cr <>) . inCmd "CSLIndent" <$> inlineListToLaTeX ils
+   go il = inlineToLaTeX il
+cslEntryToLaTeX x = blockToLaTeX x
+
 -- | Convert inline element to LaTeX
 inlineToLaTeX :: PandocMonad m
               => Inline    -- ^ Inline to convert
               -> LW m (Doc Text)
-inlineToLaTeX (Span ("",["csl-block"],[]) ils) =
-  (cr <>) . inCmd "CSLBlock" <$> inlineListToLaTeX ils
-inlineToLaTeX (Span ("",["csl-left-margin"],[]) ils) =
-  inCmd "CSLLeftMargin" <$> inlineListToLaTeX ils
-inlineToLaTeX (Span ("",["csl-right-inline"],[]) ils) =
-  (cr <>) . inCmd "CSLRightInline" <$> inlineListToLaTeX ils
-inlineToLaTeX (Span ("",["csl-indent"],[]) ils) =
-  (cr <>) . inCmd "CSLIndent" <$> inlineListToLaTeX ils
 inlineToLaTeX (Span (id',classes,kvs) ils) = do
   linkAnchor <- hypertarget False id' empty
   lang <- toLang $ lookup "lang" kvs
