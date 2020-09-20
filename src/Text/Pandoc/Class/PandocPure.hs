@@ -36,7 +36,6 @@ import Data.Word (Word8)
 import System.Directory (doesDirectoryExist, getDirectoryContents)
 import System.FilePath ((</>))
 import System.FilePath.Glob (match, compile)
-import System.Random (StdGen, split, mkStdGen)
 import Text.Pandoc.Class.CommonState (CommonState (..))
 import Text.Pandoc.Class.PandocMonad
 import Text.Pandoc.Error
@@ -48,8 +47,7 @@ import qualified Data.Text as T
 -- | The 'PureState' contains ersatz representations
 -- of things that would normally be obtained through IO.
 data PureState = PureState
-  { stStdGen     :: StdGen
-  , stWord8Store :: [Word8]    -- ^ should be infinite, i.e. [1..]
+  { stWord8Store :: [Word8]    -- ^ should be infinite, i.e. [1..]
   , stUniqStore  :: [Int]      -- ^ should be infinite and contain every
                                -- element at most once, e.g. [1..]
   , stEnv :: [(Text, Text)]
@@ -60,8 +58,7 @@ data PureState = PureState
 
 instance Default PureState where
   def = PureState
-        { stStdGen = mkStdGen 1848
-        , stWord8Store = [1..]
+        { stWord8Store = [1..]
         , stUniqStore = [1..]
         , stEnv = [("USER", "pandoc-user")]
         , stFiles = mempty
@@ -144,12 +141,6 @@ instance PandocMonad PandocPure where
   lookupEnv s = do
     env <- getsPureState stEnv
     return (lookup s env)
-
-  newStdGen = do
-    oldGen <- getsPureState stStdGen
-    let (genToStore, genToReturn) = split oldGen
-    modifyPureState $ \st -> st { stStdGen = genToStore }
-    return genToReturn
 
   newUniqueHash = do
     uniqs <- getsPureState stUniqStore

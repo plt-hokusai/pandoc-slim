@@ -22,7 +22,6 @@ module Text.Pandoc.Class.IO
   , logOutput
   , logIOError
   , lookupEnv
-  , newStdGen
   , newUniqueHash
   , openURL
   , readFileLazy
@@ -40,7 +39,6 @@ import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((</>), takeDirectory, normalise)
 import System.IO (stderr)
 import System.IO.Error
-import System.Random (StdGen)
 import Text.Pandoc.Class.PandocMonad (PandocMonad, getMediaBag, report)
 import Text.Pandoc.Definition (Pandoc, Inline (Image))
 import Text.Pandoc.Error (PandocError (..))
@@ -56,7 +54,6 @@ import qualified Data.Unique
 import qualified System.Directory
 import qualified System.Environment as Env
 import qualified System.FilePath.Glob
-import qualified System.Random
 import qualified Text.Pandoc.UTF8 as UTF8
 
 -- | Utility function to lift IO errors into 'PandocError's.
@@ -78,10 +75,6 @@ logIOError f = do
 -- | Lookup an environment variable in the programs environment.
 lookupEnv :: MonadIO m => Text -> m (Maybe Text)
 lookupEnv = fmap (fmap pack) . liftIO . Env.lookupEnv . unpack
-
--- | Return a new generator for random numbers.
-newStdGen :: MonadIO m => m StdGen
-newStdGen = liftIO System.Random.newStdGen
 
 -- | Return a new unique integer.
 newUniqueHash :: MonadIO m => m Int

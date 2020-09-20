@@ -57,7 +57,6 @@ import Network.URI ( escapeURIString, nonStrictRelativeTo,
                      parseURI, URI(..) )
 import System.FilePath ((</>), (<.>), takeExtension, dropExtension,
                         isRelative, splitDirectories)
-import System.Random (StdGen)
 import Text.Pandoc.Class.CommonState (CommonState (..))
 import Text.Pandoc.Definition
 import Text.Pandoc.Error
@@ -87,8 +86,6 @@ class (Functor m, Applicative m, Monad m, MonadError PandocError m)
       => PandocMonad m where
   -- | Lookup an environment variable.
   lookupEnv :: T.Text -> m (Maybe T.Text)
-  -- | Return a new generator for random numbers.
-  newStdGen :: m StdGen
   -- | Return a new unique integer.
   newUniqueHash :: m Int
   -- | Retrieve contents and mime type from a URL, raising
@@ -413,7 +410,6 @@ instance (MonadTrans t, PandocMonad m, Functor (t m),
           MonadError PandocError (t m), Monad (t m),
           Applicative (t m)) => PandocMonad (t m) where
   lookupEnv = lift . lookupEnv
-  newStdGen = lift newStdGen
   newUniqueHash = lift newUniqueHash
   openURL = lift . openURL
   readFileLazy = lift . readFileLazy
@@ -427,7 +423,6 @@ instance (MonadTrans t, PandocMonad m, Functor (t m),
 
 instance {-# OVERLAPS #-} PandocMonad m => PandocMonad (ParsecT s st m) where
   lookupEnv = lift . lookupEnv
-  newStdGen = lift newStdGen
   newUniqueHash = lift newUniqueHash
   openURL = lift . openURL
   readFileLazy = lift . readFileLazy

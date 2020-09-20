@@ -50,7 +50,6 @@ newtype PandocIO a = PandocIO {
 
 instance PandocMonad PandocIO where
   lookupEnv = IO.lookupEnv
-  newStdGen = IO.newStdGen
   newUniqueHash = IO.newUniqueHash
 
   openURL = IO.openURL
